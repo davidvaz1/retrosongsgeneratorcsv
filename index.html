@@ -2,52 +2,62 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Spotify Explorer - 100 Song Fetch</title>
+    <title>Spotify Explorer - Render Fix</title>
     <style>
         :root {
-            --bg: #121212; --text: #ffffff; --card: #181818; --border: #282828; --accent: #1DB954;
+            --bg: #121212; --text: #ffffff; --card: #1b1b1b; --border: #333; --accent: #1DB954;
         }
         body.light {
-            --bg: #ffffff; --text: #121212; --card: #f4f4f4; --border: #dddddd; --accent: #1aa34a;
+            --bg: #f8f9fa; --text: #212529; --card: #ffffff; --border: #dee2e6; --accent: #198754;
         }
-        body { background: var(--bg); color: var(--text); font-family: sans-serif; transition: 0.3s; padding: 40px 20px; text-align: center; }
+        body { background: var(--bg); color: var(--text); font-family: system-ui, sans-serif; transition: background 0.3s; padding: 20px; }
+        
+        .header { margin-bottom: 30px; }
         #grid { 
-            display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); 
-            gap: 20px; max-width: 1200px; margin: 30px auto; 
+            display: grid; 
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); 
+            gap: 20px; 
+            max-width: 1200px; 
+            margin: 0 auto;
+            min-height: 200px; /* Ensures grid is visible */
         }
-        .card { background: var(--card); border: 1px solid var(--border); padding: 15px; border-radius: 12px; text-align: left; }
-        .card img { width: 100%; border-radius: 8px; margin-bottom: 10px; aspect-ratio: 1/1; object-fit: cover; }
+        .card { 
+            background: var(--card); 
+            border: 1px solid var(--border); 
+            padding: 12px; 
+            border-radius: 10px; 
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .card img { 
+            width: 100%; 
+            aspect-ratio: 1; 
+            border-radius: 6px; 
+            object-fit: cover; 
+            background: #333; /* Fallback for loading */
+        }
+        .info { margin-top: 10px; font-size: 0.85rem; }
+        .song-name { font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .artist-name { color: #888; margin-top: 4px; }
+
         button { background: var(--accent); color: white; border: none; padding: 12px 24px; border-radius: 30px; cursor: pointer; font-weight: bold; margin: 5px; }
-        .toggle-btn { background: #555; font-size: 0.8rem; }
-        #status { margin-top: 10px; font-size: 0.9rem; color: var(--accent); }
+        .toggle-btn { background: #6c757d; font-size: 0.75rem; }
+        #status { margin: 15px 0; font-weight: bold; color: var(--accent); }
     </style>
 </head>
 <body class="dark">
 
-    <button class="toggle-btn" onclick="document.body.classList.toggle('light')">Toggle Light Mode</button>
-    <h1>Spotify Explorer</h1>
-    <p>Fetching 100 songs (10 pages of 10) to respect Feb 2026 Dev Limits</p>
-    
-    <button id="main-btn" onclick="generateHundred()">GENERATE 100 SONGS</button>
-    <div id="status"></div>
+    <div class="header">
+        <button class="toggle-btn" onclick="document.body.classList.toggle('light')">☀️/🌙 Toggle Mode</button>
+        <h1>Global Hits 2026</h1>
+        <button id="main-btn" onclick="generateHundred()">GENERATE 100 SONGS</button>
+        <div id="status">Ready to load...</div>
+    </div>
+
     <div id="grid"></div>
 
     <script>
-        const CLIENT_ID = 'YOUR_CLIENT_ID';
-        const CLIENT_SECRET = 'YOUR_CLIENT_SECRET';
-
-        async function getAccessToken() {
-            const res = await fetch('https://accounts.spotify.com/api/token', {
-                method: 'POST',
-                headers: {
-                    'Authorization': 'Basic ' + btoa(CLIENT_ID + ':' + CLIENT_SECRET),
-                    'Content-Type': 'application/x-www-form-urlencoded'
-                },
-                body: 'grant_type=client_credentials'
-            });
-            const data = await res.json();
-            return data.access_token;
-        }
+        const CLIENT_ID = 'YOUR_ID';
+        const CLIENT_SECRET = 'YOUR_SECRET';
 
         async function generateHundred() {
             const btn = document.getElementById('main-btn');
@@ -55,52 +65,69 @@
             const status = document.getElementById('status');
             
             btn.disabled = true;
-            grid.innerHTML = "";
+            grid.innerHTML = ""; // Clear previous
             let allTracks = [];
 
             try {
-                const token = await getAccessToken();
+                // 1. Auth
+                const authRes = await fetch('https://accounts.spotify.com/api/token', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': 'Basic ' + btoa(CLIENT_ID + ':' + CLIENT_SECRET),
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    },
+                    body: 'grant_type=client_credentials'
+                });
+                const { access_token } = await authRes.json();
 
-                // Loop 10 times to get 100 songs total (10 songs per request)
+                // 2. Loop 10 times
                 for (let i = 0; i < 10; i++) {
-                    status.innerText = `Fetching page ${i + 1} of 10...`;
+                    status.innerText = `Loading... ${ (i+1) * 10 }%`;
                     
-                    const url = new URL('https://api.spotify.com/v1/search');
-                    url.searchParams.append('q', 'year:2026');
-                    url.searchParams.append('type', 'track');
-                    url.searchParams.append('limit', '10'); // Staying under the 10 limit
-                    url.searchParams.append('offset', i * 10); // Offset moves by 10 each time
-
+                    const url = `https://api.spotify.com/v1/search?q=year:2026&type=track&limit=10&offset=${i * 10}`;
                     const res = await fetch(url, {
-                        headers: { 'Authorization': `Bearer ${token}` }
+                        headers: { 'Authorization': 'Bearer ' + access_token }
                     });
                     
                     const data = await res.json();
                     if (data.tracks && data.tracks.items) {
                         allTracks = [...allTracks, ...data.tracks.items];
-                        renderTracks(allTracks); // Render incrementally
+                        // Render immediately so user sees progress
+                        render(allTracks);
                     }
-                    
-                    // Small delay to prevent hitting rate limits during the loop
-                    await new Promise(r => setTimeout(r, 100));
+                    await new Promise(r => setTimeout(r, 150)); // Prevent rate limiting
                 }
-                status.innerText = "100 Songs Loaded Successfully.";
+                
+                status.innerText = "Successfully loaded 100 tracks.";
+                console.table(allTracks.map(t => ({name: t.name, artist: t.artists[0].name})));
+
             } catch (e) {
                 status.innerText = "Error: " + e.message;
+                console.error(e);
             } finally {
                 btn.disabled = false;
             }
         }
 
-        function renderTracks(tracks) {
+        function render(tracks) {
             const grid = document.getElementById('grid');
-            grid.innerHTML = tracks.map(t => `
-                <div class="card">
-                    <img src="${t.album.images[0]?.url || ''}">
-                    <div style="font-weight:bold; font-size: 0.85rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${t.name}</div>
-                    <div style="color: gray; font-size: 0.75rem;">${t.artists[0].name}</div>
-                </div>
-            `).join('');
+            // Using a safer mapping to handle potential missing images
+            const html = tracks.map(t => {
+                const imgUrl = t.album.images && t.album.images.length > 0 
+                               ? t.album.images[0].url 
+                               : 'https://via.placeholder.com/150';
+                return `
+                    <div class="card">
+                        <img src="${imgUrl}" alt="album art">
+                        <div class="info">
+                            <div class="song-name" title="${t.name}">${t.name}</div>
+                            <div class="artist-name">${t.artists[0].name}</div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            
+            grid.innerHTML = html;
         }
     </script>
 </body>
