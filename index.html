@@ -2,229 +2,173 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Global 100 Explorer - Glassmorphism Edition</title>
+    <title>Global 100 - Glassmorphism Edition</title>
     <style>
         :root {
             --accent: #1DB954;
-            --text-primary: #ffffff;
-            --text-secondary: #b3b3b3;
-            --bg-base: #0b0e14;
-            /* Glassmorphism variables */
             --glass-bg: rgba(255, 255, 255, 0.05);
             --glass-border: rgba(255, 255, 255, 0.1);
-            --glass-blur: blur(20px);
-        }
-
-        body.light {
-            --accent: #16a34a;
-            --text-primary: #1a1a1a;
-            --text-secondary: #555555;
-            --bg-base: #f4f7f9;
-            --glass-bg: rgba(255, 255, 255, 0.6);
-            --glass-border: rgba(255, 255, 255, 0.3);
-            --glass-blur: blur(25px);
+            --text-main: #ffffff;
+            --text-dim: #b3b3b3;
         }
 
         body { 
-            background-color: var(--bg-base);
-            color: var(--text-primary);
-            font-family: 'Inter', system-ui, sans-serif; 
-            margin: 0; padding: 40px 20px; 
-            transition: 0.3s;
-            position: relative;
-            min-height: 100vh;
-            overflow-x: hidden;
+            background: #0b0e14; color: var(--text-main); font-family: 'Inter', sans-serif; 
+            margin: 0; padding: 20px; overflow-x: hidden; min-height: 100vh;
         }
 
-        /* The Random Music Gradient Background Layer */
-        #dynamic-bg {
-            position: fixed;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            z-index: -1;
-            transition: background 1s ease-in-out;
-            opacity: 0.8;
-        }
-        body.light #dynamic-bg { opacity: 0.3; }
-
-        /* The GLASSY UI Container */
-        .glass-container {
-            background: var(--glass-bg);
-            border: 1px solid var(--glass-border);
-            backdrop-filter: var(--glass-blur);
-            border-radius: 20px;
-            padding: 30px;
-            max-width: 500px;
-            margin: 0 auto 30px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-            position: relative;
-            z-index: 10;
+        /* DYNAMIC FLOATING BACKGROUND */
+        #bg-canvas {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            z-index: -1; filter: blur(40px); opacity: 0.6;
         }
 
-        h1 { margin-top: 0; font-weight: 800; font-size: 2.2rem; }
+        .header {
+            max-width: 600px; margin: 40px auto; text-align: center;
+            background: var(--glass-bg); backdrop-filter: blur(20px);
+            padding: 30px; border-radius: 24px; border: 1px solid var(--glass-border);
+        }
 
-        .auth-inputs { display: flex; flex-direction: column; gap: 15px; margin-bottom: 25px; }
+        .auth-grid { display: flex; flex-direction: column; gap: 12px; margin: 20px 0; }
         
         input { 
-            width: calc(100% - 24px); 
-            padding: 12px; 
-            border-radius: 10px; 
-            border: 1px solid var(--glass-border);
-            background: rgba(0,0,0,0.3);
-            color: var(--text-primary);
-            font-size: 0.95rem;
+            padding: 14px; border-radius: 10px; border: 1px solid var(--glass-border);
+            background: rgba(0,0,0,0.4); color: white; font-size: 14px;
         }
-        body.light input { background: rgba(255,255,255,0.7); }
-        
-        button { 
-            background: var(--accent); color: white; border: none; 
-            padding: 16px 35px; border-radius: 50px; 
-            cursor: pointer; font-weight: 800; letter-spacing: 1px;
-            box-shadow: 0 4px 15px rgba(29, 185, 84, 0.3);
-            transition: 0.2s;
-        }
-        button:hover { transform: scale(1.03); }
-        button:disabled { background: #555; box-shadow: none; opacity: 0.7; }
-        
-        .mode-btn { background: #333; font-size: 0.7rem; padding: 8px 15px; margin-bottom: 15px; }
 
-        #status { margin: 20px; font-weight: bold; font-size: 1.1rem; color: var(--accent); }
-
-        /* Song Cards */
+        /* GRID & ALIGNMENT FIX */
         #grid { 
-            display: grid; 
-            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); 
-            gap: 25px; 
-            max-width: 1300px; 
-            margin: 40px auto; 
-            position: relative; z-index: 10;
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); 
+            gap: 25px; max-width: 1400px; margin: 0 auto; 
         }
 
         .card { 
-            background: var(--glass-bg); 
-            border: 1px solid var(--glass-border);
-            backdrop-filter: var(--glass-blur);
-            border-radius: 15px; 
-            overflow: hidden; 
-            transition: transform 0.3s, box-shadow 0.3s;
-            text-align: left;
+            background: var(--glass-bg); backdrop-filter: blur(25px);
+            border-radius: 20px; border: 1px solid var(--glass-border);
+            overflow: hidden; display: flex; flex-direction: column;
+            transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
-        .card:hover { transform: translateY(-8px); box-shadow: 0 12px 24px rgba(0,0,0,0.4); }
+        .card:hover { transform: translateY(-10px); border-color: var(--accent); }
+
         .card img { width: 100%; aspect-ratio: 1; object-fit: cover; }
-        .card-content { padding: 18px; }
-        .song-title { font-weight: 800; font-size: 1rem; margin-bottom: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .artist-name { color: var(--accent); font-weight: 600; font-size: 0.85rem; }
+        
+        .card-body { padding: 20px; display: flex; flex-direction: column; flex-grow: 1; }
+        .song-title { font-weight: 800; font-size: 1.1rem; margin-bottom: 5px; height: 2.6em; overflow: hidden; }
+        .artist-name { color: var(--accent); font-weight: 600; font-size: 0.9rem; margin-bottom: 15px; }
+        
+        .meta-group { font-size: 0.8rem; color: var(--text-dim); flex-grow: 1; margin-bottom: 20px; }
+        .meta-line { display: flex; justify-content: space-between; margin-bottom: 6px; }
+
+        .btn-spotify { 
+            background: var(--accent); color: white; text-decoration: none; 
+            text-align: center; padding: 12px; border-radius: 12px; 
+            font-weight: 700; font-size: 0.9rem;
+        }
+
+        .generate-btn {
+            background: var(--accent); color: white; border: none; padding: 18px 40px;
+            border-radius: 50px; font-weight: 800; cursor: pointer; transition: 0.2s;
+        }
+        .generate-btn:hover { transform: scale(1.05); box-shadow: 0 0 20px rgba(29, 185, 84, 0.4); }
+
+        #status { margin-top: 15px; font-weight: 600; color: var(--accent); }
     </style>
 </head>
-<body class="dark">
+<body>
 
-    <div id="dynamic-bg"></div>
+    <div id="bg-canvas"></div>
 
-    <div class="glass-container header">
-        <button class="mode-btn" onclick="document.body.classList.toggle('light')">☀️/🌙 Toggle Mode</button>
+    <div class="header">
         <h1>Global 100 Explorer</h1>
-        
-        <div class="auth-inputs">
+        <div class="auth-grid">
             <input type="text" id="clientId" placeholder="Spotify Client ID">
             <input type="password" id="clientSecret" placeholder="Spotify Client Secret">
         </div>
-        
-        <button id="btn" onclick="runExplorer()">FETCH TOP 100 GLOBAL</button>
-        <div id="status">Syncing with charts...</div>
+        <button class="generate-btn" id="btn" onclick="runExplorer()">FETCH GLOBAL 100</button>
+        <div id="status">Ready</div>
     </div>
 
     <div id="grid"></div>
 
     <script>
-        // FUNCTION 1: Generate a random music-themed gradient background
-        function setRandomMusicBg() {
-            const dynamicBg = document.getElementById('dynamic-bg');
-            const palettes = [
-                ['#ff0080', '#7928ca'], // Purple Haze
-                ['#ff4d4d', '#ff9f4d', '#ffe04d'], // Sunset Beats
-                ['#1DB954', '#121212', '#000000'], // Spotify Neon
-                ['#00ffff', '#ff00ff', '#ff8000'], // Acid Techno
-                ['#ff9a9e', '#fad0c4'], // Soft Melodies
-                ['#a18cd1', '#fbc2eb'], // Lo-Fi Chill
-                ['#4facfe', '#00f2fe'] // Electric Blues
-            ];
-            
-            // Generate random angle (0-360 deg)
-            const angle = Math.floor(Math.random() * 361);
-            const palette = palettes[Math.floor(Math.random() * palettes.length)];
-            const gradientString = `linear-gradient(${angle}deg, ${palette.join(', ')})`;
-            
-            // Optional: Add a subtle overlay texture
-            const noise = 'url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAMAAAAp4uR6AAAABGdBTUEAALGPC/xhBQAAAAFzUkdCAK7OHOkAAAAYUExURf///8DAwKCgoAAAAAAAAAAAAAAAAAAAAOqOqS8AAAACdFJOUwBA5Mv7AAAAWUlEQVRYw+3TQRGAQAwDQW5oI4wKAt4AOf6Y6w0w4E7mI2/zD3b8g6H5P6TnP5id/8N6/4f1/g/t+Q9t+Q/p+T+k5/+Qnv9dev6L5r3W0gN3/Yf2XpL2At4AAAAASUVORK5CYII=)';
-            
-            dynamicBg.style.background = `${noise}, ${gradientString}`;
+        // 1. RANDOM FLOATING BACKGROUND ENGINE
+        function createBackground() {
+            const canvas = document.getElementById('bg-canvas');
+            const colors = ['#ff0080', '#7928ca', '#1DB954', '#00f2fe', '#4facfe', '#ff4d4d'];
+            for(let i = 0; i < 15; i++) {
+                const blob = document.createElement('div');
+                const size = Math.random() * 400 + 200;
+                blob.style.cssText = `
+                    position: absolute;
+                    width: ${size}px; height: ${size}px;
+                    background: ${colors[Math.floor(Math.random() * colors.length)]};
+                    border-radius: 50%;
+                    top: ${Math.random() * 100}%; left: ${Math.random() * 100}%;
+                    animation: float ${Math.random() * 20 + 10}s infinite linear alternate;
+                `;
+                canvas.appendChild(blob);
+            }
         }
+        
+        // Add CSS Animation dynamically
+        const style = document.createElement('style');
+        style.innerHTML = `@keyframes float { from { transform: translate(0,0); } to { transform: translate(100px, 100px); } }`;
+        document.head.appendChild(style);
+        createBackground();
 
-        // Run this once when the page loads
-        setRandomMusicBg();
-
-        // FUNCTION 2: Secure Netlify Function-based search
         async function runExplorer() {
             const id = document.getElementById('clientId').value;
             const secret = document.getElementById('clientSecret').value;
             const status = document.getElementById('status');
             const grid = document.getElementById('grid');
-            const btn = document.getElementById('btn');
             
             if (!id || !secret) return alert("Enter credentials!");
-
-            btn.disabled = true;
             grid.innerHTML = "";
-            status.style.color = "var(--accent)";
-            let allTracks = [];
+            let tracks = [];
 
             try {
-                // Loop 10 times to fetch 100 tracks (10 per request per 2026 limits)
-                for (let i = 0; i < 10; i++) {
-                    status.innerText = `Fetching Global Tracks: ${ (i+1)*10 }%`;
+                const authRes = await fetch('https://accounts.spotify.com/api/token', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': 'Basic ' + btoa(id + ':' + secret),
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    },
+                    body: 'grant_type=client_credentials'
+                });
+                const { access_token } = await authRes.json();
+
+                // Fetching in batches of 20 for better market filtering
+                for (let i = 0; i < 5; i++) {
+                    status.innerText = `Fetching Global Hits: ${(i+1)*20}%`;
                     
-                    const response = await fetch('/.netlify/functions/spotify', {
-                        method: 'GET',
-                        headers: {
-                            'x-client-id': id,
-                            'x-client-secret': secret,
-                            'x-offset': i * 10
-                        }
+                    // Locked to US market to prevent regional Hindi trends as requested
+                    const res = await fetch(`https://api.spotify.com/v1/search?q=top+100+global+2026&type=track&limit=20&offset=${i*20}&market=US`, {
+                        headers: { 'Authorization': 'Bearer ' + access_token }
                     });
-
-                    if (!response.ok) {
-                        const err = await response.json();
-                        throw new Error(err.message || "Failed to fetch charts");
-                    }
-
-                    const data = await response.json();
-                    
-                    // Defense check and combine the data
+                    const data = await res.json();
                     if (data?.tracks?.items) {
-                        allTracks = [...allTracks, ...data.tracks.items];
-                        render(allTracks); // Incremental Render
+                        tracks = [...tracks, ...data.tracks.items];
+                        render(tracks);
                     }
                 }
-                status.innerText = `${allTracks.length} Global Tracks Synchronized.`;
-                // Generate a fresh music background after a successful load
-                setRandomMusicBg();
-            } catch (e) {
-                status.style.color = "#ff5555";
-                status.innerText = e.message;
-            } finally {
-                btn.disabled = false;
-            }
+                status.innerText = "100 Global Tracks Synchronized.";
+            } catch (e) { status.innerText = "Error: " + e.message; }
         }
 
-        // FUNCTION 3: Defensive Render Function
         function render(tracks) {
             const grid = document.getElementById('grid');
             grid.innerHTML = tracks.map(t => `
                 <div class="card">
-                    <img src="${t.album?.images?.[0]?.url || 'https://via.placeholder.com/220?text=No+Cover'}" loading="lazy">
-                    <div class="card-content">
-                        <div class="song-title" title="${t.name}">${t.name || 'Unknown Track'}</div>
-                        <div class="artist-name">${t.artists?.[0]?.name || 'Unknown Artist'}</div>
+                    <img src="${t.album.images[0]?.url || ''}">
+                    <div class="card-body">
+                        <div class="song-title">${t.name}</div>
+                        <div class="artist-name">${t.artists[0].name}</div>
+                        <div class="meta-group">
+                            <div class="meta-line"><span>Album</span> <span>${t.album.name.slice(0,15)}..</span></div>
+                            <div class="meta-line"><span>Released</span> <span>${t.album.release_date}</span></div>
+                            <div class="meta-line"><span>Popularity</span> <span>${t.popularity}%</span></div>
+                        </div>
+                        <a href="${t.external_urls.spotify}" target="_blank" class="btn-spotify">LISTEN ON SPOTIFY</a>
                     </div>
                 </div>
             `).join('');
