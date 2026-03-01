@@ -2,104 +2,128 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Global 100 - Final Resolution</title>
+    <title>Global Explorer - 2026 Final</title>
     <style>
-        :root { --accent: #1DB954; --glass: rgba(255, 255, 255, 0.08); --border: rgba(255, 255, 255, 0.15); }
-        body { background: #05070a; color: white; font-family: 'Inter', sans-serif; margin: 0; padding: 20px; min-height: 100vh; }
-        .orb { position: fixed; width: 400px; height: 400px; border-radius: 50%; filter: blur(100px); z-index: -1; opacity: 0.3; background: var(--accent); top: 0; left: 0; }
-        .header { max-width: 500px; margin: 20px auto 40px; text-align: center; background: var(--glass); backdrop-filter: blur(25px); padding: 30px; border-radius: 24px; border: 1px solid var(--border); }
-        .auth-grid { display: grid; gap: 10px; margin: 20px 0; }
-        input { padding: 12px; border-radius: 10px; border: 1px solid var(--border); background: rgba(0,0,0,0.6); color: white; outline: none; }
-        #grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 25px; max-width: 1400px; margin: 0 auto; }
-        .card { background: var(--glass); backdrop-filter: blur(20px); border-radius: 20px; border: 1px solid var(--border); overflow: hidden; display: flex; flex-direction: column; height: 100%; transition: 0.3s; }
+        :root { --accent: #1DB954; --glass: rgba(255, 255, 255, 0.1); --border: rgba(255, 255, 255, 0.2); }
+        body { background: #080a0f; color: white; font-family: 'Inter', system-ui; margin: 0; padding: 20px; min-height: 100vh; }
+        
+        /* Animated Background */
+        .bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; background: radial-gradient(circle at 10% 20%, #1db95422 0%, transparent 40%), radial-gradient(circle at 90% 80%, #7928ca22 0%, transparent 40%); }
+
+        .header {
+            max-width: 500px; margin: 40px auto; text-align: center;
+            background: var(--glass); backdrop-filter: blur(20px);
+            padding: 30px; border-radius: 24px; border: 1px solid var(--border);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+        }
+
+        .inputs { display: flex; flex-direction: column; gap: 10px; margin: 20px 0; }
+        input { padding: 14px; border-radius: 12px; border: 1px solid var(--border); background: rgba(0,0,0,0.5); color: white; outline: none; }
+        input:focus { border-color: var(--accent); }
+
+        #grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); 
+            gap: 25px; max-width: 1400px; margin: 40px auto; 
+        }
+
+        .card { 
+            background: var(--glass); backdrop-filter: blur(15px); border-radius: 20px; border: 1px solid var(--border);
+            overflow: hidden; display: flex; flex-direction: column; transition: 0.3s ease;
+        }
+        .card:hover { transform: translateY(-10px); border-color: var(--accent); }
         .card img { width: 100%; aspect-ratio: 1; object-fit: cover; }
-        .card-body { padding: 20px; flex-grow: 1; display: flex; flex-direction: column; }
-        .song-title { font-weight: 800; font-size: 1.1rem; height: 2.6em; overflow: hidden; margin-bottom: 5px; }
-        .artist { color: var(--accent); font-weight: 700; margin-bottom: 15px; }
-        .btn-link { background: var(--accent); color: white; text-decoration: none; text-align: center; padding: 12px; border-radius: 12px; font-weight: 800; margin-top: auto; }
-        #status { color: var(--accent); font-weight: 800; margin-top: 15px; display: block; }
+        .content { padding: 20px; flex-grow: 1; display: flex; flex-direction: column; }
+        .title { font-weight: 800; font-size: 1.1rem; margin-bottom: 5px; height: 2.6em; overflow: hidden; }
+        .artist { color: var(--accent); font-weight: 700; margin-bottom: 15px; font-size: 0.9rem; }
+        .btn { background: var(--accent); color: white; text-decoration: none; text-align: center; padding: 12px; border-radius: 12px; font-weight: 800; margin-top: auto; }
+
+        #status { color: var(--accent); font-weight: 800; margin-top: 15px; display: block; font-size: 0.9rem; }
     </style>
 </head>
 <body>
-    <div class="orb"></div>
+    <div class="bg"></div>
     <div class="header">
-        <h1>Global 100 Explorer</h1>
-        <div class="auth-grid">
-            <input type="text" id="id" placeholder="Client ID">
-            <input type="password" id="secret" placeholder="Client Secret">
+        <h1 style="margin:0; letter-spacing: -1px;">Global 100</h1>
+        <div class="inputs">
+            <input type="text" id="id" placeholder="Spotify Client ID">
+            <input type="password" id="secret" placeholder="Spotify Client Secret">
         </div>
-        <button onclick="run()" style="background:var(--accent); color:white; border:none; padding:15px; border-radius:30px; cursor:pointer; font-weight:900; width:100%;">FORCE SYNC TRACKS</button>
-        <span id="status">Network Ready</span>
+        <button onclick="run()" style="width:100%; padding:16px; background:var(--accent); color:white; border:none; border-radius:30px; cursor:pointer; font-weight:900; font-size: 1rem;">FORCE LOAD TRACKS</button>
+        <span id="status">Ready to Connect</span>
     </div>
     <div id="grid"></div>
 
     <script>
         async function run() {
-            const id = document.getElementById('id').value.trim();
-            const secret = document.getElementById('secret').value.trim();
+            const clientId = document.getElementById('id').value.trim();
+            const clientSecret = document.getElementById('secret').value.trim();
             const status = document.getElementById('status');
             const grid = document.getElementById('grid');
-            
-            if (!id || !secret) return (status.innerText = "Error: Credentials Missing");
 
+            if (!clientId || !clientSecret) return alert("Missing Credentials");
+            
             grid.innerHTML = "";
-            status.innerText = "Bypassing Regional Filters...";
+            status.innerText = "Authenticating...";
 
             try {
-                // 1. AUTHENTICATION
-                const authRes = await fetch('https://accounts.spotify.com/api/token', {
+                // 1. Auth Flow
+                const authResponse = await fetch('https://accounts.spotify.com/api/token', {
                     method: 'POST',
-                    headers: { 
-                        'Authorization': 'Basic ' + btoa(id + ':' + secret),
+                    headers: {
+                        'Authorization': 'Basic ' + btoa(clientId + ':' + clientSecret),
                         'Content-Type': 'application/x-www-form-urlencoded'
                     },
                     body: 'grant_type=client_credentials'
                 });
 
-                const authData = await authRes.json();
-                if (!authRes.ok) throw new Error(authData.error_description || "Auth Failure");
-                const token = authData.access_token;
+                if (!authResponse.ok) {
+                    const err = await authResponse.json();
+                    throw new Error(`Auth Error: ${err.error_description || 'Check ID/Secret'}`);
+                }
+                const { access_token } = await authResponse.json();
 
-                // 2. THE "TOP 50 GLOBAL" PLAYLIST METHOD
-                // This bypasses the Search API issues by pulling directly from a curated ID
-                // Playlist ID: 37i9dQZEVXbMDoHDwfc2t1 (Global Top 50)
+                // 2. Playlist Request (Global Top 50)
+                status.innerText = "Accessing Global Stream...";
                 const playlistId = '37i9dQZEVXbMDoHDwfc2t1';
-                const url = `https://api.spotify.com/v1/playlists/${playlistId}/tracks?limit=50&market=US`;
                 
-                const res = await fetch(url, {
-                    headers: { 'Authorization': `Bearer ${token}` }
+                // Using the absolute cleanest URL format for 2026
+                const trackResponse = await fetch(`https://api.spotify.com/v1/playlists/${playlistId}/tracks?limit=50`, {
+                    headers: { 'Authorization': `Bearer ${access_token}` }
                 });
 
-                if (!res.ok) throw new Error("Spotify rejected the Playlist request.");
+                if (!trackResponse.ok) {
+                    const trackErr = await trackResponse.json();
+                    throw new Error(`API Error ${trackResponse.status}: ${trackErr.error?.message || 'Rejected'}`);
+                }
 
-                const data = await res.json();
-                const tracks = data.items;
-
-                if (tracks && tracks.length > 0) {
-                    tracks.forEach(item => {
+                const data = await trackResponse.json();
+                
+                if (data.items && data.items.length > 0) {
+                    data.items.forEach(item => {
                         const track = item.track;
                         if (!track) return;
-                        
+
                         const card = document.createElement('div');
                         card.className = 'card';
                         card.innerHTML = `
-                            <img src="${track.album.images[0]?.url || ''}">
-                            <div class="card-body">
-                                <div class="song-title">${track.name}</div>
+                            <img src="${track.album.images[0]?.url || ''}" loading="lazy">
+                            <div class="content">
+                                <div class="title">${track.name}</div>
                                 <div class="artist">${track.artists[0].name}</div>
-                                <a href="${track.external_urls.spotify}" target="_blank" class="btn-link">OPEN SPOTIFY</a>
+                                <a href="${track.external_urls.spotify}" target="_blank" class="btn">LISTEN</a>
                             </div>
                         `;
                         grid.appendChild(card);
                     });
-                    status.innerText = `Success: ${tracks.length} Global Hits Loaded.`;
+                    status.innerText = `Successfully Loaded ${data.items.length} Tracks`;
                 } else {
-                    status.innerText = "Empty response. Try checking your Developer Dashboard for 'Web API' activation.";
+                    status.innerText = "Playlist found, but it appears to be empty.";
                 }
 
             } catch (e) {
-                status.innerText = "Fatal Error: " + e.message;
-                console.error(e);
+                status.innerText = e.message;
+                console.error("Full Debug Log:", e);
             }
         }
     </script>
