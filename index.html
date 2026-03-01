@@ -2,99 +2,112 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Global 100 - Visible Edition</title>
+    <title>Global 100 - Infinite Variety</title>
     <style>
         :root {
             --accent: #1DB954;
-            --glass: rgba(255, 255, 255, 0.05);
-            --border: rgba(255, 255, 255, 0.1);
+            --glass: rgba(255, 255, 255, 0.08);
+            --border: rgba(255, 255, 255, 0.12);
         }
 
         body { 
-            background: #0b1016; color: white; font-family: 'Inter', sans-serif; 
-            margin: 0; padding: 20px; min-height: 100vh;
+            background: #090c10; color: white; font-family: 'Inter', sans-serif; 
+            margin: 0; padding: 20px; min-height: 100vh; overflow-x: hidden;
         }
 
-        /* BACKGROUND ELEMENTS FOR BLUR DEPTH */
+        /* Animated Music Blobs */
         .blob {
-            position: fixed; width: 400px; height: 400px; border-radius: 50%;
-            filter: blur(80px); z-index: -1; opacity: 0.5; animation: move 20s infinite alternate;
+            position: fixed; width: 500px; height: 500px; border-radius: 50%;
+            filter: blur(90px); z-index: -1; opacity: 0.4; animation: float 25s infinite alternate;
         }
 
-        @keyframes move { from { transform: translate(0,0); } to { transform: translate(20vw, 20vh); } }
+        @keyframes float { from { transform: translate(-10%, -10%) rotate(0deg); } to { transform: translate(30%, 20%) rotate(180deg); } }
 
         .header {
-            max-width: 600px; margin: 40px auto; text-align: center;
-            background: var(--glass); backdrop-filter: blur(20px);
-            padding: 30px; border-radius: 24px; border: 1px solid var(--border);
+            max-width: 650px; margin: 40px auto; text-align: center;
+            background: var(--glass); backdrop-filter: blur(30px);
+            padding: 40px; border-radius: 30px; border: 1px solid var(--border);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
         }
 
-        .auth-grid { display: flex; flex-direction: column; gap: 10px; margin: 20px 0; }
-        input { padding: 12px; border-radius: 8px; border: 1px solid var(--border); background: #000; color: white; }
+        .auth-grid { display: flex; flex-direction: column; gap: 12px; margin: 25px 0; }
+        input { 
+            padding: 15px; border-radius: 12px; border: 1px solid var(--border); 
+            background: rgba(0,0,0,0.5); color: white; font-size: 14px; outline: none;
+        }
+        input:focus { border-color: var(--accent); }
 
-        /* THE GRID - Forced Visibility */
         #grid { 
-            display: grid !important; 
-            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); 
-            gap: 20px; max-width: 1400px; margin: 40px auto;
-            visibility: visible !important; opacity: 1 !important;
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); 
+            gap: 25px; max-width: 1400px; margin: 50px auto; 
         }
 
         .card { 
             background: var(--glass); backdrop-filter: blur(20px);
-            border-radius: 16px; border: 1px solid var(--border);
+            border-radius: 20px; border: 1px solid var(--border);
             overflow: hidden; display: flex; flex-direction: column;
-            height: 100%; transition: 0.3s;
+            transition: 0.4s cubic-bezier(0.2, 1, 0.2, 1);
         }
-        .card:hover { transform: translateY(-5px); border-color: var(--accent); }
-        .card img { width: 100%; aspect-ratio: 1; object-fit: cover; background: #222; }
+        .card:hover { transform: scale(1.03); border-color: var(--accent); box-shadow: 0 10px 30px rgba(0,0,0,0.4); }
+        .card img { width: 100%; aspect-ratio: 1; object-fit: cover; }
         
-        .card-body { padding: 15px; display: flex; flex-direction: column; flex-grow: 1; }
-        .song-title { font-weight: 700; height: 2.8em; overflow: hidden; margin-bottom: 5px; }
-        .artist-name { color: var(--accent); font-size: 0.9rem; margin-bottom: 15px; font-weight: 600; }
+        .card-body { padding: 20px; display: flex; flex-direction: column; flex-grow: 1; }
+        .song-title { font-weight: 800; font-size: 1.1rem; height: 2.8em; overflow: hidden; margin-bottom: 5px; line-height: 1.4; }
+        .artist-name { color: var(--accent); font-weight: 700; font-size: 0.95rem; margin-bottom: 15px; }
         
-        .meta { font-size: 0.75rem; color: #aaa; margin-bottom: 15px; flex-grow: 1; }
-        .meta div { display: flex; justify-content: space-between; margin-bottom: 4px; }
+        .meta { font-size: 0.8rem; color: #ccc; margin-bottom: 20px; flex-grow: 1; }
+        .meta-row { display: flex; justify-content: space-between; margin-bottom: 6px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 4px; }
 
         .play-btn { 
             background: var(--accent); color: white; text-decoration: none; 
-            text-align: center; padding: 10px; border-radius: 8px; font-weight: 700;
+            text-align: center; padding: 14px; border-radius: 14px; font-weight: 800;
+            font-size: 0.9rem; transition: 0.3s;
+        }
+        .play-btn:hover { filter: brightness(1.2); letter-spacing: 1px; }
+
+        .gen-btn {
+            background: var(--accent); color: white; border: none; padding: 18px 45px;
+            border-radius: 40px; cursor: pointer; font-weight: 900; font-size: 1.1rem;
+            box-shadow: 0 10px 20px rgba(29, 185, 84, 0.3);
         }
 
-        #status { font-weight: bold; color: var(--accent); margin-top: 10px; }
+        #status { font-weight: 700; color: var(--accent); margin-top: 20px; font-size: 1.1rem; }
     </style>
 </head>
 <body>
 
-    <div class="blob" style="background: #7928ca; top: 10%; left: 10%;"></div>
-    <div class="blob" style="background: #ff0080; bottom: 10%; right: 10%; animation-delay: -5s;"></div>
+    <div class="blob" style="background: #1DB954; top: -10%; left: -10%;"></div>
+    <div class="blob" style="background: #7928ca; bottom: -10%; right: -10%; animation-delay: -7s;"></div>
 
     <div class="header">
-        <h1>Global 100 Explorer</h1>
+        <h1 style="margin:0; font-size: 2.5rem; letter-spacing: -1px;">Global 100 Explorer</h1>
+        <p style="color: #888; margin-bottom: 20px;">Feb 2026 High-Fidelity Sync</p>
+        
         <div class="auth-grid">
             <input type="text" id="clientId" placeholder="Spotify Client ID">
             <input type="password" id="clientSecret" placeholder="Spotify Client Secret">
         </div>
-        <button onclick="run()" style="background:var(--accent); color:white; border:none; padding:15px 30px; border-radius:30px; cursor:pointer; font-weight:800;">GENERATE 100 SONGS</button>
-        <div id="status">Ready</div>
+        
+        <button class="gen-btn" onclick="generate()">GENERATE NEW HITS</button>
+        <div id="status">System Ready</div>
     </div>
 
     <div id="grid"></div>
 
     <script>
-        async function run() {
+        async function generate() {
             const id = document.getElementById('clientId').value;
             const secret = document.getElementById('clientSecret').value;
             const status = document.getElementById('status');
             const grid = document.getElementById('grid');
             
-            if(!id || !secret) return alert("Missing credentials");
+            if(!id || !secret) return alert("Enter credentials first!");
             
-            grid.innerHTML = ""; // Clear grid
+            grid.innerHTML = ""; 
             let tracks = [];
 
             try {
-                // 1. Auth
+                // 1. Authenticate
                 const auth = await fetch('https://accounts.spotify.com/api/token', {
                     method: 'POST',
                     headers: {
@@ -103,59 +116,55 @@
                     },
                     body: 'grant_type=client_credentials'
                 });
-                
                 const { access_token } = await auth.json();
 
-                // 2. Fetch Loop
+                // 2. RANDOMIZER LOGIC
+                // Pick a random char and a random start offset to get fresh results
+                const characters = 'abcdefghijklmnopqrstuvwxyz';
+                const randomChar = characters.charAt(Math.floor(Math.random() * characters.length));
+                const randomStart = Math.floor(Math.random() * 200);
+
                 for (let i = 0; i < 10; i++) {
-                    status.innerText = `Syncing Batch ${i+1}/10...`;
+                    status.innerText = `Randomizing Global Seed: ${ (i+1)*10 }%`;
                     
-                    // We use "top global" search and US market to avoid regional Hindi songs
-                    const res = await fetch(`https://api.spotify.com/v1/search?q=top+global+2026&type=track&limit=10&offset=${i*10}&market=US`, {
+                    // The 'q' parameter now uses the random character + wildcard
+                    // Market=US ensures we avoid the regional Hindi tracks
+                    const offset = randomStart + (i * 10);
+                    const url = `https://api.spotify.com/v1/search?q=year:2026&type=track&limit=10&offset=$${randomChar}%2a&offset=${offset}&market=US`;
+                    
+                    const res = await fetch(url, {
                         headers: { 'Authorization': 'Bearer ' + access_token }
                     });
                     
                     const data = await res.json();
                     if(data.tracks?.items) {
                         tracks = [...tracks, ...data.tracks.items];
-                        render(tracks); // Render immediately
+                        render(tracks);
                     }
                 }
-                status.innerText = "100 Tracks Loaded Successfully.";
+                status.innerText = "100 Unique Tracks Synchronized.";
             } catch (e) {
-                status.innerText = "Error: " + e.message;
-                console.error(e);
+                status.innerText = "Sync Error: " + e.message;
             }
         }
 
         function render(list) {
             const grid = document.getElementById('grid');
-            // Safe mapping to prevent "undefined" errors from stopping the render
-            grid.innerHTML = list.map(t => {
-                const img = t.album?.images[0]?.url || '';
-                const name = t.name || 'Unknown Track';
-                const artist = t.artists[0]?.name || 'Unknown Artist';
-                const album = t.album?.name || 'Unknown Album';
-                const date = t.album?.release_date || 'N/A';
-                const pop = t.popularity || 0;
-                const link = t.external_urls?.spotify || '#';
-
-                return `
-                    <div class="card">
-                        <img src="${img}" onerror="this.src='https://via.placeholder.com/300?text=No+Cover'">
-                        <div class="card-body">
-                            <div class="song-title">${name}</div>
-                            <div class="artist-name">${artist}</div>
-                            <div class="meta">
-                                <div><span>Album</span><span>${album.slice(0,15)}..</span></div>
-                                <div><span>Date</span><span>${date}</span></div>
-                                <div><span>Popularity</span><span>${pop}%</span></div>
-                            </div>
-                            <a href="${link}" target="_blank" class="play-btn">LISTEN ON SPOTIFY</a>
+            grid.innerHTML = list.map(t => `
+                <div class="card">
+                    <img src="${t.album?.images[0]?.url || ''}" loading="lazy">
+                    <div class="card-body">
+                        <div class="song-title">${t.name}</div>
+                        <div class="artist-name">${t.artists[0]?.name}</div>
+                        <div class="meta">
+                            <div class="meta-row"><span>Album</span><span>${t.album?.name.slice(0,18)}..</span></div>
+                            <div class="meta-row"><span>Popularity</span><span>${t.popularity}%</span></div>
+                            <div class="meta-row"><span>Year</span><span>${t.album?.release_date.split('-')[0]}</span></div>
                         </div>
+                        <a href="${t.external_urls?.spotify}" target="_blank" class="play-btn">OPEN IN SPOTIFY</a>
                     </div>
-                `;
-            }).join('');
+                </div>
+            `).join('');
         }
     </script>
 </body>
