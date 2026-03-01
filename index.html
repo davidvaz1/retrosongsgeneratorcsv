@@ -2,63 +2,54 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Global 100 - Force Display</title>
+    <title>Global 100 - Visible Fix</title>
     <style>
-        :root { --accent: #1DB954; --glass: rgba(255, 255, 255, 0.1); }
-        body { background: #0b0e14; color: white; font-family: sans-serif; margin: 0; padding: 20px; }
+        /* Minimalist, high-contrast styles to ensure visibility */
+        body { background: #121212; color: #ffffff; font-family: sans-serif; padding: 20px; }
         
-        /* Floating background for Glassmorphism depth */
-        .bg-blur { position: fixed; width: 50vw; height: 50vw; border-radius: 50%; filter: blur(100px); z-index: -1; opacity: 0.3; background: linear-gradient(#1DB954, #7928ca); animation: move 20s infinite alternate; }
-        @keyframes move { from { transform: translate(-10%, -10%); } to { transform: translate(30%, 30%); } }
-
-        .header {
-            max-width: 500px; margin: 0 auto 30px; text-align: center;
-            background: var(--glass); backdrop-filter: blur(20px);
-            padding: 25px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.1);
+        .controls { 
+            background: #181818; padding: 20px; border-radius: 8px; 
+            max-width: 500px; margin: 0 auto 30px; border: 2px solid #333;
         }
-
-        .inputs { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
-        input { padding: 12px; border-radius: 8px; border: 1px solid #333; background: #000; color: #fff; }
-
-        /* THE GRID - Forced Layout */
+        input { width: 90%; padding: 10px; margin: 10px 0; display: block; }
+        
+        /* FORCED GRID VISIBILITY */
         #grid { 
-            display: grid !important; 
-            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)) !important; 
-            gap: 20px !important; 
+            display: block !important; /* Changed from grid to block for maximum compatibility */
             width: 100% !important;
             min-height: 500px;
+            border: 1px dashed #444; /* Debug border: if you see this, the container is there */
         }
 
         .card { 
-            background: rgba(255,255,255,0.05); backdrop-filter: blur(10px);
-            border-radius: 15px; border: 1px solid rgba(255,255,255,0.1);
-            padding: 15px; display: flex; flex-direction: column;
+            background: #282828; 
+            margin: 15px; 
+            padding: 15px; 
+            border-radius: 8px;
+            display: flex; /* Horizontal layout is harder to "hide" than a grid */
+            align-items: center;
+            border-left: 5px solid #1DB954;
         }
-        .card img { width: 100%; aspect-ratio: 1; border-radius: 10px; object-fit: cover; background: #222; }
-        .info { margin-top: 15px; flex-grow: 1; }
-        .t { font-weight: bold; font-size: 1.1rem; margin-bottom: 5px; display: block; }
-        .a { color: var(--accent); font-size: 0.9rem; display: block; margin-bottom: 10px; }
-        .meta { font-size: 0.75rem; color: #aaa; line-height: 1.6; }
+        .card img { width: 80px; height: 80px; margin-right: 20px; border-radius: 4px; background: #000; }
+        .info { flex-grow: 1; }
+        .info b { font-size: 1.2rem; display: block; margin-bottom: 4px; color: #fff; }
+        .info span { color: #b3b3b3; font-size: 0.9rem; }
         
-        .link { 
-            display: block; background: var(--accent); color: white; text-align: center; 
-            padding: 10px; border-radius: 8px; text-decoration: none; font-weight: bold; margin-top: 15px;
+        .link-btn { 
+            background: #1DB954; color: white; text-decoration: none; 
+            padding: 8px 15px; border-radius: 20px; font-weight: bold; font-size: 0.8rem;
         }
-        #status { color: var(--accent); font-weight: bold; margin-top: 10px; }
+        #status { color: #1DB954; font-weight: bold; text-align: center; display: block; margin: 10px; }
     </style>
 </head>
 <body>
 
-    <div class="bg-blur"></div>
-
-    <div class="header">
-        <h2>Global 100</h2>
-        <div class="inputs">
-            <input type="text" id="id" placeholder="Client ID">
-            <input type="password" id="secret" placeholder="Client Secret">
-        </div>
-        <button onclick="run()" style="width:100%; padding:15px; background:var(--accent); color:white; border:none; border-radius:30px; cursor:pointer; font-weight:bold;">GENERATE 100 SONGS</button>
-        <div id="status">Ready</div>
+    <div class="controls">
+        <h2 style="margin:0">Spotify Global 100</h2>
+        <input type="text" id="id" placeholder="Client ID">
+        <input type="password" id="secret" placeholder="Client Secret">
+        <button onclick="run()" style="width:100%; padding:15px; background:#1DB954; color:white; border:none; font-weight:bold; cursor:pointer;">GENERATE LIST</button>
+        <span id="status">Ready</span>
     </div>
 
     <div id="grid"></div>
@@ -70,10 +61,11 @@
             const status = document.getElementById('status');
             const grid = document.getElementById('grid');
             
-            if(!id || !secret) return alert("Keys missing!");
+            if(!id || !secret) return alert("Enter keys!");
             
-            grid.innerHTML = "Attempting to draw cards..."; 
-            
+            grid.innerHTML = "<h3 style='text-align:center'>Clearing grid and starting injection...</h3>";
+            status.innerText = "Authenticating...";
+
             try {
                 // 1. Auth
                 const auth = await fetch('https://accounts.spotify.com/api/token', {
@@ -83,52 +75,42 @@
                 });
                 const { access_token } = await auth.json();
 
-                // 2. Fetch with a broader search to ensure data exists
-                // market=US filter is still active to avoid regional/Hindi clutter
+                // 2. Fetch 100 songs in 5 batches
+                grid.innerHTML = ""; // Clear for real cards
+                
                 for (let i = 0; i < 5; i++) {
-                    status.innerText = `Syncing: ${ (i+1)*20 }/100`;
+                    status.innerText = `Drawing Cards: ${ (i+1)*20 }/100`;
                     
-                    const res = await fetch(`https://api.spotify.com/v1/search?q=top%20hits&type=track&limit=20&offset=${i*20}&market=US`, {
+                    const res = await fetch(`https://api.spotify.com/v1/search?q=top+hits+2026&type=track&limit=20&offset=${i*20}&market=US`, {
                         headers: { 'Authorization': 'Bearer ' + access_token }
                     });
                     const data = await res.json();
 
                     if(data.tracks && data.tracks.items) {
-                        if(i === 0) grid.innerHTML = ""; // Clear the "Attempting" text on first batch
-                        
                         data.tracks.items.forEach(track => {
-                            // DEFENSIVE DATA EXTRACTION
-                            const img = track.album?.images?.[0]?.url || '';
-                            const name = track.name || 'Unknown';
-                            const artist = track.artists?.[0]?.name || 'Unknown';
-                            const album = track.album?.name || 'N/A';
-                            const date = track.album?.release_date || 'N/A';
-                            const pop = track.popularity || 0;
-                            const url = track.external_urls?.spotify || '#';
-
-                            // CREATE ELEMENT
-                            const div = document.createElement('div');
-                            div.className = 'card';
-                            div.innerHTML = `
+                            // Manual Creation to avoid innerHTML string issues
+                            const card = document.createElement('div');
+                            card.className = 'card';
+                            
+                            const img = track.album?.images[0]?.url || 'https://via.placeholder.com/80';
+                            
+                            card.innerHTML = `
                                 <img src="${img}">
                                 <div class="info">
-                                    <span class="t">${name}</span>
-                                    <span class="a">${artist}</span>
-                                    <div class="meta">
-                                        Album: ${album.slice(0,20)}...<br>
-                                        Released: ${date}<br>
-                                        Popularity: ${pop}%
-                                    </div>
-                                    <a href="${url}" target="_blank" class="link">LISTEN</a>
+                                    <b>${track.name}</b>
+                                    <span>${track.artists[0].name} • ${track.album.name}</span><br>
+                                    <small style="color:#666">Popularity: ${track.popularity}% | Released: ${track.album.release_date}</small>
                                 </div>
+                                <a href="${track.external_urls.spotify}" target="_blank" class="link-btn">LISTEN</a>
                             `;
-                            grid.appendChild(div);
+                            grid.appendChild(card);
                         });
                     }
                 }
-                status.innerText = "Display Complete.";
+                status.innerText = "FINISH: 100 items added to the page.";
             } catch (e) {
-                status.innerText = "Error: " + e.message;
+                status.innerText = "FATAL ERROR: " + e.message;
+                console.error(e);
             }
         }
     </script>
