@@ -2,56 +2,68 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Global 100 - Stability Restored</title>
+    <title>Global 100 - Final Visibility Fix</title>
     <style>
         :root { --accent: #1DB954; --glass: rgba(255, 255, 255, 0.08); --border: rgba(255, 255, 255, 0.15); }
-        body { background: #0b0e14; color: white; font-family: 'Inter', sans-serif; margin: 0; padding: 20px; min-height: 100vh; overflow-x: hidden; }
+        
+        body { 
+            background: #0b0e14; color: white; font-family: 'Inter', sans-serif; 
+            margin: 0; padding: 20px; min-height: 100vh;
+        }
 
-        /* Floating Background for Glassmorphism Depth */
-        .orb { position: fixed; width: 500px; height: 500px; border-radius: 50%; filter: blur(80px); z-index: -1; opacity: 0.4; animation: drift 20s infinite alternate; }
-        @keyframes drift { from { transform: translate(-10%, -10%); } to { transform: translate(30%, 30%); } }
+        /* Fixed Background Blobs */
+        .bg-blob {
+            position: fixed; width: 600px; height: 600px; border-radius: 50%;
+            filter: blur(100px); z-index: -1; opacity: 0.5;
+        }
 
         .header {
-            max-width: 600px; margin: 40px auto; text-align: center;
-            background: var(--glass); backdrop-filter: blur(25px);
+            position: relative; z-index: 10;
+            max-width: 600px; margin: 20px auto 40px; text-align: center;
+            background: var(--glass); backdrop-filter: blur(30px);
             padding: 30px; border-radius: 24px; border: 1px solid var(--border);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
 
         .auth-grid { display: grid; gap: 10px; margin: 20px 0; }
-        input { padding: 12px; border-radius: 10px; border: 1px solid var(--border); background: rgba(0,0,0,0.6); color: white; outline: none; }
+        input { padding: 12px; border-radius: 10px; border: 1px solid var(--border); background: rgba(0,0,0,0.6); color: white; }
 
-        /* THE GRID */
+        /* THE GRID - Forced Visibility and Layout */
         #grid { 
+            position: relative; z-index: 5;
             display: grid !important; 
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); 
-            gap: 25px; max-width: 1400px; margin: 0 auto;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)) !important; 
+            gap: 25px !important; 
+            max-width: 1400px; margin: 0 auto;
+            min-height: 400px; /* Forces the container to have height */
+            visibility: visible !important;
         }
 
         .card { 
             background: var(--glass); backdrop-filter: blur(20px);
             border-radius: 20px; border: 1px solid var(--border);
             overflow: hidden; display: flex; flex-direction: column; height: 100%;
-            transition: transform 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
         }
-        .card:hover { transform: translateY(-10px); border-color: var(--accent); }
-        .card img { width: 100%; aspect-ratio: 1; object-fit: cover; background: #111; }
+        .card img { width: 100%; aspect-ratio: 1; object-fit: cover; background: #1a1a1a; }
         
         .card-body { padding: 20px; display: flex; flex-direction: column; flex-grow: 1; }
         .song-title { font-weight: 800; font-size: 1.1rem; height: 2.6em; overflow: hidden; margin-bottom: 5px; }
         .artist { color: var(--accent); font-weight: 700; font-size: 0.9rem; margin-bottom: 15px; }
         
-        .meta { font-size: 0.8rem; color: #aaa; margin-bottom: 20px; flex-grow: 1; }
-        .meta-row { display: flex; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.05); padding: 4px 0; }
+        .meta-row { display: flex; justify-content: space-between; font-size: 0.8rem; color: #aaa; margin-bottom: 5px; }
 
-        .btn-spotify { background: var(--accent); color: white; text-decoration: none; text-align: center; padding: 12px; border-radius: 12px; font-weight: 800; }
-        #status { color: var(--accent); font-weight: 800; margin-top: 15px; display: block; }
+        .btn-link { 
+            background: var(--accent); color: white; text-decoration: none; 
+            text-align: center; padding: 12px; border-radius: 12px; 
+            font-weight: 800; margin-top: auto;
+        }
+        #status { color: var(--accent); font-weight: bold; display: block; margin-top: 15px; }
     </style>
 </head>
 <body>
 
-    <div class="orb" style="background: #1DB954; top: -100px; left: -100px;"></div>
-    <div class="orb" style="background: #7928ca; bottom: -100px; right: -100px; animation-delay: -5s;"></div>
+    <div class="bg-blob" style="background: #1DB954; top: -200px; left: -200px;"></div>
+    <div class="bg-blob" style="background: #7928ca; bottom: -200px; right: -200px;"></div>
 
     <div class="header">
         <h1>Global 100 Explorer</h1>
@@ -60,7 +72,7 @@
             <input type="password" id="secret" placeholder="Client Secret">
         </div>
         <button onclick="run()" style="background:var(--accent); color:white; border:none; padding:15px; border-radius:30px; cursor:pointer; font-weight:900; width:100%;">GENERATE 100 SONGS</button>
-        <span id="status">System Ready</span>
+        <span id="status">Ready to Sync</span>
     </div>
 
     <div id="grid"></div>
@@ -72,13 +84,14 @@
             const status = document.getElementById('status');
             const grid = document.getElementById('grid');
             
-            if(!id || !secret) return alert("Keys missing!");
+            if(!id || !secret) return alert("Keys required.");
             
+            // CLEAR EVERYTHING
             grid.innerHTML = "";
-            status.innerText = "Connecting to Spotify...";
+            status.innerText = "Authorizing...";
 
             try {
-                // 1. Auth
+                // 1. Get Access Token
                 const authRes = await fetch('https://accounts.spotify.com/api/token', {
                     method: 'POST',
                     headers: { 
@@ -89,13 +102,12 @@
                 });
                 
                 const authData = await authRes.json();
-                if(!authData.access_token) throw new Error("Authentication failed.");
+                if(!authData.access_token) throw new Error("Check your Client ID/Secret");
                 const token = authData.access_token;
 
-                // 2. Guaranteed Search Query
-                // Using "year:2026" + market:US is the most stable way to get results.
+                // 2. Fetch using a guaranteed search (2026 hits)
                 for (let i = 0; i < 5; i++) {
-                    status.innerText = `Drawing Items: ${ (i+1)*20 } / 100`;
+                    status.innerText = `Painting UI: ${ (i+1)*20 }%`;
                     
                     const res = await fetch(`https://api.spotify.com/v1/search?q=year:2026&type=track&limit=20&offset=${i*20}&market=US`, {
                         headers: { 'Authorization': 'Bearer ' + token }
@@ -103,39 +115,29 @@
                     
                     const data = await res.json();
 
-                    if(data.tracks && data.tracks.items && data.tracks.items.length > 0) {
+                    if(data.tracks && data.tracks.items) {
                         data.tracks.items.forEach(track => {
-                            const card = document.createElement('div');
-                            card.className = 'card';
-                            
-                            const img = track.album?.images[0]?.url || 'https://via.placeholder.com/300';
-                            const popularity = track.popularity || 0; // POPULARITY SCORE FIX
-
-                            card.innerHTML = `
-                                <img src="${img}">
-                                <div class="card-body">
-                                    <div class="song-title">${track.name}</div>
-                                    <div class="artist">${track.artists[0].name}</div>
-                                    <div class="meta">
-                                        <div class="meta-row"><span>Album</span><span>${track.album.name.slice(0,15)}..</span></div>
-                                        <div class="meta-row"><span>Released</span><span>${track.album.release_date}</span></div>
-                                        <div class="meta-row"><span>Popularity</span><span>${popularity}%</span></div>
+                            // Using a safe template string to create cards
+                            const cardHTML = `
+                                <div class="card">
+                                    <img src="${track.album.images[0]?.url || ''}" loading="lazy">
+                                    <div class="card-body">
+                                        <div class="song-title">${track.name}</div>
+                                        <div class="artist">${track.artists[0].name}</div>
+                                        <div class="meta-row"><span>Album</span><span>${track.album.name.slice(0,12)}..</span></div>
+                                        <div class="meta-row"><span>Popularity</span><span>${track.popularity}%</span></div>
+                                        <a href="${track.external_urls.spotify}" target="_blank" class="btn-link">SPOTIFY LINK</a>
                                     </div>
-                                    <a href="${track.external_urls.spotify}" target="_blank" class="btn-spotify">LISTEN ON SPOTIFY</a>
                                 </div>
                             `;
-                            grid.appendChild(card);
+                            // Direct insertion into the grid's HTML
+                            grid.insertAdjacentHTML('beforeend', cardHTML);
                         });
-                    } else if (i === 0) {
-                        status.innerText = "Error: Search returned 0 results.";
                     }
                 }
-                
-                if(grid.children.length > 0) {
-                    status.innerText = `Success: ${grid.children.length} Tracks Displayed.`;
-                }
+                status.innerText = `Success: ${grid.children.length} Tracks Displayed.`;
             } catch (e) {
-                status.innerText = "Fatal Error: " + e.message;
+                status.innerText = "Error: " + e.message;
                 console.error(e);
             }
         }
