@@ -48,18 +48,22 @@ exports.handler = async (event) => {
     const authHeader = { Authorization: "Bearer " + token };
 
     // Step 2: Try multiple strategies to get new music
+    // Note: /browse/new-releases was removed in Feb 2026, tag:new search filter
+    // no longer works, and dev-mode apps can only access owned/collaborated playlists.
+    // All strategies now use the Search API with pagination (limit max is 10).
 
-    // Strategy 1: Try /browse/new-releases
-    let albums = await tryNewReleases(authHeader);
+    // Strategy 1: Search for albums from the current year
+    let albums = await searchAlbums(authHeader, `year:${new Date().getFullYear()}`);
 
-    // Strategy 2: Fall back to Search API for new albums
+    // Strategy 2: Broaden to current + previous year
     if (!albums) {
-      albums = await trySearchNewAlbums(authHeader);
+      const year = new Date().getFullYear();
+      albums = await searchAlbums(authHeader, `year:${year - 1}-${year}`);
     }
 
-    // Strategy 3: Fall back to Spotify's "New Music Friday" playlist
+    // Strategy 3: Generic search for new music
     if (!albums) {
-      albums = await tryPlaylist(authHeader);
+      albums = await searchAlbums(authHeader, "new music");
     }
 
     if (!albums || albums.length === 0) {
@@ -84,59 +88,36 @@ exports.handler = async (event) => {
   }
 };
 
-async function tryNewReleases(authHeader) {
+// Search for albums using the Spotify Search API with pagination.
+// The API now limits results to 10 per request, so we paginate to collect more.
+async function searchAlbums(authHeader, query) {
   try {
-    const res = await fetch("https://api.spotify.com/v1/browse/new-releases?limit=50&country=US", {
-      headers: authHeader,
-    });
-    if (!res.ok) return null;
-    const data = await res.json();
-    return data.albums?.items || null;
-  } catch {
-    return null;
-  }
-}
-
-async function trySearchNewAlbums(authHeader) {
-  try {
-    const res = await fetch(
-      "https://api.spotify.com/v1/search?q=tag%3Anew&type=album&limit=50&market=US",
-      { headers: authHeader }
-    );
-    if (!res.ok) return null;
-    const data = await res.json();
-    return data.albums?.items || null;
-  } catch {
-    return null;
-  }
-}
-
-async function tryPlaylist(authHeader) {
-  try {
-    // "New Music Friday" playlist by Spotify
-    const res = await fetch(
-      "https://api.spotify.com/v1/playlists/37i9dQZF1DX4JAvHpjipBk?fields=tracks.items(track(album(name,images,external_urls,artists)))",
-      { headers: authHeader }
-    );
-    if (!res.ok) return null;
-    const data = await res.json();
-
-    // Extract unique albums from playlist tracks
-    const seen = new Set();
     const albums = [];
-    for (const item of data.tracks?.items || []) {
-      const album = item.track?.album;
-      if (album && !seen.has(album.name)) {
-        seen.add(album.name);
-        albums.push({
-          name: album.name,
-          images: album.images,
-          external_urls: album.external_urls,
-          artists: album.artists,
-        });
-      }
+    const maxResults = 50;
+    const pageSize = 10;
+
+    for (let offset = 0; offset < maxResults; offset += pageSize) {
+      const url =
+        "https://api.spotify.com/v1/search?" +
+        new URLSearchParams({
+          q: query,
+          type: "album",
+          limit: String(pageSize),
+          offset: String(offset),
+          market: "US",
+        }).toString();
+
+      const res = await fetch(url, { headers: authHeader });
+      if (!res.ok) break;
+
+      const data = await res.json();
+      const items = data.albums?.items;
+      if (!items || items.length === 0) break;
+
+      albums.push(...items);
     }
-    return albums.length > 0 ? albums.slice(0, 50) : null;
+
+    return albums.length > 0 ? albums : null;
   } catch {
     return null;
   }
