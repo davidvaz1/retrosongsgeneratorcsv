@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Global 100 - Final Paint Fix</title>
+    <title>Global 100 - Final Stability Fix</title>
     <style>
         :root { --accent: #1DB954; --glass: rgba(255, 255, 255, 0.08); --border: rgba(255, 255, 255, 0.15); }
         body { background: #05070a; color: white; font-family: 'Inter', sans-serif; margin: 0; padding: 20px; min-height: 100vh; }
@@ -21,16 +21,14 @@
         .auth-grid { display: grid; gap: 10px; margin-bottom: 20px; }
         input { padding: 12px; border-radius: 8px; border: 1px solid var(--border); background: rgba(0,0,0,0.6); color: white; }
         
-        /* GRID FIX: Solid Display */
         #grid { 
             display: grid !important; 
             grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); 
             gap: 25px; max-width: 1400px; margin: 40px auto;
-            min-height: 500px; /* Forces space to exist */
         }
 
         .card { 
-            background: var(--glass); backdrop-filter: blur(15px);
+            background: var(--glass); backdrop-filter: blur(20px);
             border-radius: 20px; border: 1px solid var(--border);
             overflow: hidden; display: flex; flex-direction: column; height: 100%;
         }
@@ -55,7 +53,7 @@
     <div class="orb" style="background: #7928ca; bottom: -100px; right: -100px; animation-delay: -10s;"></div>
 
     <div class="header">
-        <h1 style="margin:0">Global 100 Explorer</h1>
+        <h1>Global 100 Explorer</h1>
         <div class="auth-grid">
             <input type="text" id="clientId" placeholder="Client ID">
             <input type="password" id="clientSecret" placeholder="Client Secret">
@@ -85,44 +83,60 @@
                     headers: { 'Authorization': 'Basic ' + btoa(id + ':' + secret), 'Content-Type': 'application/x-www-form-urlencoded' },
                     body: 'grant_type=client_credentials'
                 });
-                const { access_token } = await auth.json();
+                const authData = await auth.json();
+                const access_token = authData.access_token;
 
-                // 2. Multi-batch fetch with randomness
+                // 2. Random Seed for variety
                 const seed = "abcdefghijklmnopqrstuvwxyz"[Math.floor(Math.random()*26)];
                 
                 for (let i = 0; i < 5; i++) {
                     status.innerText = `Fetching: ${ (i+1)*20 } / 100`;
                     
+                    // Fixed Market=US to avoid Hindi tracks
                     const res = await fetch(`https://api.spotify.com/v1/search?q=${seed}*&type=track&limit=20&offset=${i*20}&market=US`, {
                         headers: { 'Authorization': 'Bearer ' + access_token }
                     });
                     
                     const data = await res.json();
-                    if(data.tracks?.items) {
+                    
+                    if(data && data.tracks && data.tracks.items) {
                         data.tracks.items.forEach(track => {
-                            // Direct Injection into DOM (No waiting for variables)
+                            // DEFENSIVE CHECK: Skip if critical data is missing
+                            if (!track || !track.album) return;
+
                             const card = document.createElement('div');
                             card.className = 'card';
+                            
+                            // Safe data extraction
+                            const imgUrl = track.album.images && track.album.images[0] ? track.album.images[0].url : '';
+                            const trackName = track.name || 'Unknown Title';
+                            const artistName = track.artists && track.artists[0] ? track.artists[0].name : 'Unknown Artist';
+                            const albumName = track.album.name || 'Unknown Album';
+                            const releaseDate = track.album.release_date || 'N/A';
+                            const popularity = track.popularity || '0';
+                            const spotifyUrl = track.external_urls ? track.external_urls.spotify : '#';
+
                             card.innerHTML = `
-                                <img src="${track.album.images[0]?.url || ''}">
+                                <img src="${imgUrl}" onerror="this.src='https://via.placeholder.com/300?text=No+Cover'">
                                 <div class="card-content">
-                                    <div class="title">${track.name}</div>
-                                    <div class="artist">${track.artists[0].name}</div>
+                                    <div class="title">${trackName}</div>
+                                    <div class="artist">${artistName}</div>
                                     <div class="stats">
-                                        <div><span>Album</span><span>${track.album.name.slice(0,12)}..</span></div>
-                                        <div><span>Release</span><span>${track.album.release_date.split('-')[0]}</span></div>
-                                        <div><span>Popularity</span><span>${track.popularity}%</span></div>
+                                        <div><span>Album</span><span>${albumName.slice(0,12)}..</span></div>
+                                        <div><span>Release</span><span>${releaseDate.split('-')[0]}</span></div>
+                                        <div><span>Popularity</span><span>${popularity}%</span></div>
                                     </div>
-                                    <a href="${track.external_urls.spotify}" target="_blank" class="play-link">SPOTIFY LINK</a>
+                                    <a href="${spotifyUrl}" target="_blank" class="play-link">SPOTIFY LINK</a>
                                 </div>
                             `;
                             grid.appendChild(card);
                         });
                     }
                 }
-                status.innerText = "✨ 100 Songs Displayed Successfully";
+                status.innerText = "✨ 100 Songs Displayed";
             } catch (e) {
                 status.innerText = "System Error: " + e.message;
+                console.error("Debug Error:", e);
             }
         }
     </script>
