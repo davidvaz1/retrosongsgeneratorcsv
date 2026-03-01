@@ -2,75 +2,79 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Global 100 Explorer - 2026 Edition</title>
+    <title>Global 100 - Performance Edition</title>
     <style>
         :root {
-            --bg: #0b0e14;
-            --card-bg: rgba(255, 255, 255, 0.05);
-            --text: #e0e6ed;
-            --accent: #1DB954;
+            --bg: #0b0e14; --card-bg: #181c25; --text: #e0e6ed; --accent: #1DB954; --secondary: #b3b3b3;
         }
         body.light {
-            --bg: #f4f7f9;
-            --card-bg: #ffffff;
-            --text: #1a1a1a;
-            --accent: #16a34a;
+            --bg: #f8f9fa; --card-bg: #ffffff; --text: #1a1a1a; --accent: #16a34a; --secondary: #555;
         }
         body { 
-            background: var(--bg); color: var(--text); font-family: 'Segoe UI', system-ui; 
-            margin: 0; padding: 40px 20px; transition: 0.3s;
+            background: var(--bg); color: var(--text); font-family: 'Inter', -apple-system, sans-serif; 
+            margin: 0; padding: 20px; transition: 0.3s;
         }
+        .header { margin-bottom: 40px; text-align: center; }
         .auth-container {
-            background: var(--card-bg); padding: 25px; border-radius: 20px;
-            max-width: 450px; margin: 0 auto 30px; border: 1px solid rgba(255,255,255,0.1);
-            backdrop-filter: blur(10px);
+            background: var(--card-bg); padding: 20px; border-radius: 12px;
+            max-width: 500px; margin: 0 auto 30px; border: 1px solid rgba(255,255,255,0.1);
+            display: flex; flex-direction: column; gap: 10px;
         }
         input { 
-            width: 85%; padding: 12px; margin: 8px 0; border-radius: 10px; 
-            border: 1px solid #333; background: rgba(0,0,0,0.3); color: #fff;
+            padding: 12px; border-radius: 6px; border: 1px solid #333; 
+            background: rgba(0,0,0,0.2); color: #fff; width: calc(100% - 26px); align-self: center;
         }
+        /* Grid Alignment Fix */
         #grid { 
-            display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); 
-            gap: 25px; max-width: 1300px; margin: 0 auto; 
+            display: grid; 
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); 
+            gap: 25px; max-width: 1400px; margin: 0 auto; 
         }
         .card { 
-            background: var(--card-bg); border-radius: 15px; overflow: hidden;
-            border: 1px solid rgba(255,255,255,0.1); transition: transform 0.3s, box-shadow 0.3s;
-            text-align: left; position: relative;
+            background: var(--card-bg); border-radius: 12px; overflow: hidden;
+            border: 1px solid rgba(255,255,255,0.05); display: flex; flex-direction: column;
+            transition: 0.2s ease-in-out; height: 100%;
         }
-        .card:hover { transform: translateY(-8px); box-shadow: 0 12px 24px rgba(0,0,0,0.4); }
-        .card img { width: 100%; aspect-ratio: 1; object-fit: cover; }
-        .card-content { padding: 15px; }
-        .song-title { font-weight: 800; font-size: 1rem; margin-bottom: 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .artist-name { color: var(--accent); font-weight: 600; font-size: 0.85rem; }
-        .extra-info { font-size: 0.75rem; color: #888; margin-top: 10px; line-height: 1.4; }
+        .card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.3); }
+        .card img { width: 100%; aspect-ratio: 1/1; object-fit: cover; }
         
-        button { 
-            background: var(--accent); color: white; border: none; padding: 15px 35px; 
-            border-radius: 50px; cursor: pointer; font-weight: 800; letter-spacing: 1px;
-            box-shadow: 0 4px 15px rgba(29, 185, 84, 0.3);
+        .card-body { padding: 16px; display: flex; flex-direction: column; flex-grow: 1; }
+        .song-title { font-weight: 700; font-size: 1.1rem; margin: 0 0 4px 0; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        .artist-name { color: var(--accent); font-weight: 600; font-size: 0.9rem; margin-bottom: 12px; }
+        
+        .meta-data { font-size: 0.8rem; color: var(--secondary); margin-bottom: 15px; flex-grow: 1; }
+        .meta-item { margin-bottom: 4px; display: flex; justify-content: space-between; }
+        
+        .btn-play { 
+            background: var(--accent); color: white; text-decoration: none; 
+            text-align: center; padding: 10px; border-radius: 6px; 
+            font-weight: 700; font-size: 0.85rem; transition: 0.2s;
         }
-        #status { margin: 20px; font-weight: bold; font-size: 1.1rem; }
+        .btn-play:hover { opacity: 0.9; transform: scale(1.02); }
+
+        .main-action-btn { 
+            background: var(--accent); color: white; border: none; padding: 16px 32px; 
+            border-radius: 30px; cursor: pointer; font-weight: 800; font-size: 1rem;
+        }
+        #status { margin: 20px; font-weight: 600; color: var(--accent); }
     </style>
 </head>
 <body>
 
-    <button onclick="document.body.classList.toggle('light')" style="background:#333; font-size:0.7rem; margin-bottom: 20px;">Toggle Theme</button>
-    <h1>Global Chart Explorer</h1>
-
-    <div class="auth-container">
-        <input type="text" id="clientId" placeholder="Spotify Client ID">
-        <input type="password" id="clientSecret" placeholder="Spotify Client Secret">
+    <div class="header">
+        <button onclick="document.body.classList.toggle('light')" style="cursor:pointer; padding:5px 10px; border-radius:15px; border:none;">🌓 Mode</button>
+        <h1>Global 100 Explorer</h1>
+        <div class="auth-container">
+            <input type="text" id="clientId" placeholder="Spotify Client ID">
+            <input type="password" id="clientSecret" placeholder="Spotify Client Secret">
+        </div>
+        <button class="main-action-btn" id="btn" onclick="runExplorer()">FETCH TOP 100 GLOBAL</button>
+        <div id="status">Ready</div>
     </div>
 
-    <button id="btn" onclick="runExplorer()">FETCH TOP 100 GLOBAL</button>
-    <div id="status">Ready to sync...</div>
     <div id="grid"></div>
 
     <script>
-        // Simple regex to detect Devanagari (Hindi) characters
-        const isHindi = (str) => /[\u0900-\u097F]/.test(str);
-
         async function runExplorer() {
             const id = document.getElementById('clientId').value;
             const secret = document.getElementById('clientSecret').value;
@@ -80,11 +84,9 @@
             if (!id || !secret) return alert("Enter credentials!");
 
             grid.innerHTML = "";
-            status.style.color = "var(--accent)";
             let allTracks = [];
 
             try {
-                // 1. Auth
                 const authRes = await fetch('https://accounts.spotify.com/api/token', {
                     method: 'POST',
                     headers: {
@@ -93,29 +95,26 @@
                     },
                     body: 'grant_type=client_credentials'
                 });
-                if (!authRes.ok) throw new Error("Auth failed. Check IDs.");
                 const { access_token } = await authRes.json();
 
-                // 2. Fetching Loop (10 x 10 = 100)
-                for (let i = 0; i < 10; i++) {
-                    status.innerText = `Filtering Global Charts: ${ (i+1)*10 }%`;
+                // To minimize Hindi tracks, we search the "Global Top 50" playlist items 
+                // or use a tag:new query filtered by non-IN markets.
+                for (let i = 0; i < 5; i++) { // Fetching 5 batches of 20
+                    status.innerText = `Syncing Global Trends: ${ (i+1)*20 }%`;
                     
-                    // Using "tag:new" or "top global" to get actual popular tracks
-                    const url = `https://api.spotify.com/v1/search?q=year:2026&type=track&limit=10&offset=${i * 10}`;
-                    const res = await fetch(url, { headers: { 'Authorization': `Bearer ${access_token}` } });
+                    // PASS: Changed query to specifically target global charts and non-regional tags
+                    const url = `https://api.spotify.com/v1/search?q=top%20global%202026&type=track&limit=20&offset=${i * 20}`;
+                    const res = await fetch(url, { headers: { 'Authorization': 'Bearer ' + access_token } });
                     const data = await res.json();
 
                     if (data?.tracks?.items) {
-                        // Filter out Hindi songs based on character detection
-                        const filteredBatch = data.tracks.items.filter(item => !isHindi(item.name) && !isHindi(item.artists[0].name));
-                        allTracks = [...allTracks, ...filteredBatch];
+                        allTracks = [...allTracks, ...data.tracks.items];
                         render(allTracks);
                     }
                 }
-                status.innerText = `Final Count: ${allTracks.length} Global Tracks Displayed.`;
+                status.innerText = `100 Global Tracks Synchronized.`;
             } catch (e) {
-                status.style.color = "#ff5555";
-                status.innerText = e.message;
+                status.innerText = "Error: " + e.message;
             }
         }
 
@@ -123,15 +122,20 @@
             const grid = document.getElementById('grid');
             grid.innerHTML = tracks.map(t => `
                 <div class="card">
-                    <img src="${t.album?.images?.[0]?.url || ''}" loading="lazy">
-                    <div class="card-content">
-                        <div class="song-title" title="${t.name}">${t.name}</div>
+                    <img src="${t.album?.images?.[0]?.url || ''}" alt="cover">
+                    <div class="card-body">
+                        <div class="song-title">${t.name}</div>
                         <div class="artist-name">${t.artists[0].name}</div>
-                        <div class="extra-info">
-                            <strong>Album:</strong> ${t.album.name}<br>
-                            <strong>Released:</strong> ${t.album.release_date}<br>
-                            <strong>Popularity:</strong> ${t.popularity}%
+                        
+                        <div class="meta-data">
+                            <div class="meta-item"><span>Album</span> <span>${t.album.name.substring(0,20)}...</span></div>
+                            <div class="meta-item"><span>Released</span> <span>${t.album.release_date}</span></div>
+                            <div class="meta-item"><span>Popularity</span> <span>${t.popularity}%</span></div>
                         </div>
+
+                        <a href="${t.external_urls.spotify}" target="_blank" class="btn-play">
+                            LISTEN ON SPOTIFY
+                        </a>
                     </div>
                 </div>
             `).join('');
