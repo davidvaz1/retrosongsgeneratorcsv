@@ -38,48 +38,40 @@
             const status = document.getElementById('status');
             const grid = document.getElementById('grid');
 
-            status.innerText = "Authenticating...";
+            if (!id || !secret) {
+                status.innerText = "Please enter both Client ID and Client Secret.";
+                return;
+            }
+
+            status.innerText = "Fetching new releases...";
             grid.innerHTML = "";
 
             try {
-                // 1. Auth
-                const authRes = await fetch('https://accounts.spotify.com/api/token', {
+                const res = await fetch('/.netlify/functions/spotify', {
                     method: 'POST',
-                    headers: {
-                        'Authorization': 'Basic ' + btoa(id + ':' + secret),
-                        'Content-Type': 'application/x-www-form-urlencoded'
-                    },
-                    body: 'grant_type=client_credentials'
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ client_id: id, client_secret: secret })
                 });
-                
-                const authData = await authRes.json();
-                if (!authRes.ok) throw new Error(authData.error_description || "Auth Error");
-
-                // 2. Fetch New Releases (Most reliable 2026 endpoint)
-                status.innerText = "Fetching Global New Releases...";
-                const res = await fetch('https://api.spotify.com/v1/browse/new-releases?limit=50&country=US', {
-                    headers: { 'Authorization': 'Bearer ' + authData.access_token }
-                });
-
-                if (!res.ok) {
-                    const err = await res.json();
-                    throw new Error(`API Error ${res.status}: ${err.error.message}`);
-                }
 
                 const data = await res.json();
-                data.albums.items.forEach(album => {
+
+                if (!res.ok) {
+                    throw new Error(data.error || `Error ${res.status}`);
+                }
+
+                data.albums.forEach(album => {
                     const card = document.createElement('div');
                     card.className = 'card';
                     card.innerHTML = `
-                        <img src="${album.images[0].url}">
+                        <img src="${album.images[0]?.url || ''}">
                         <strong>${album.name}</strong><br>
-                        <small>${album.artists[0].name}</small>
-                        <a href="${album.external_urls.spotify}" target="_blank" class="btn">VIEW ALBUM</a>
+                        <small>${album.artists[0]?.name || 'Unknown'}</small>
+                        <a href="${album.external_urls?.spotify || '#'}" target="_blank" class="btn">VIEW ALBUM</a>
                     `;
                     grid.appendChild(card);
                 });
 
-                status.innerText = "Success: 50 New Releases Loaded.";
+                status.innerText = `Success: ${data.albums.length} New Releases Loaded.`;
             } catch (e) {
                 status.innerText = e.message;
             }
