@@ -2,44 +2,63 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Spotify 100 - One File Fix</title>
+    <title>Global Hits 2026 - Final Fix</title>
     <style>
-        body { background: #121212; color: white; font-family: sans-serif; text-align: center; padding: 20px; }
-        .auth { background: #181818; padding: 20px; border-radius: 10px; margin-bottom: 20px; border: 1px solid #333; }
-        input { padding: 10px; margin: 5px; border-radius: 5px; border: 1px solid #444; background: #000; color: #fff; width: 250px; }
+        :root { --bg: #121212; --text: #fff; --accent: #1DB954; --card: #181818; }
+        body.light { --bg: #fdfdfd; --text: #121212; --accent: #1aa34a; --card: #eee; }
+        body { background: var(--bg); color: var(--text); font-family: sans-serif; transition: 0.3s; padding: 20px; text-align: center; }
+        
+        /* Auth Box */
+        .auth-container { background: var(--card); padding: 20px; border-radius: 12px; max-width: 400px; margin: 0 auto 20px; border: 1px solid #333; }
+        input { width: 90%; padding: 10px; margin: 5px 0; border-radius: 5px; border: 1px solid #444; background: #000; color: #fff; }
+        body.light input { background: #fff; color: #000; }
+
+        /* Results Grid */
         #grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 15px; margin-top: 20px; }
-        .card { background: #1c1c1c; padding: 10px; border-radius: 8px; text-align: left; font-size: 0.8rem; border: 1px solid #333; }
-        .card img { width: 100%; border-radius: 4px; aspect-ratio: 1; object-fit: cover; }
-        button { background: #1DB954; color: white; border: none; padding: 12px 25px; border-radius: 20px; cursor: pointer; font-weight: bold; }
-        #status { color: #1DB954; margin: 10px; font-weight: bold; }
+        .card { background: var(--card); padding: 10px; border-radius: 8px; text-align: left; font-size: 0.8rem; border: 1px solid #333; }
+        .card img { width: 100%; border-radius: 4px; aspect-ratio: 1; object-fit: cover; background: #333; }
+        
+        button { background: var(--accent); color: white; border: none; padding: 12px 25px; border-radius: 20px; cursor: pointer; font-weight: bold; margin: 10px; }
+        #status { color: var(--accent); margin: 10px; font-weight: bold; min-height: 1.2em; }
+        .error { color: #ff5555 !important; }
     </style>
 </head>
 <body>
 
-    <div class="auth">
-        <input type="text" id="id" placeholder="Client ID">
-        <input type="password" id="secret" placeholder="Client Secret">
+    <button onclick="document.body.classList.toggle('light')" style="background:#555; font-size:0.7rem;">Toggle Mode</button>
+    <h1>Global Hits 2026</h1>
+
+    <div class="auth-container">
+        <input type="text" id="clientId" placeholder="Spotify Client ID">
+        <input type="password" id="clientSecret" placeholder="Spotify Client Secret">
     </div>
 
-    <button id="btn" onclick="go()">GENERATE 100 SONGS</button>
+    <button id="btn" onclick="runExplorer()">GENERATE 100 SONGS</button>
     <div id="status">Ready</div>
     <div id="grid"></div>
 
     <script>
-        async function go() {
-            const id = document.getElementById('id').value;
-            const secret = document.getElementById('secret').value;
+        async function runExplorer() {
+            const id = document.getElementById('clientId').value;
+            const secret = document.getElementById('clientSecret').value;
             const status = document.getElementById('status');
             const grid = document.getElementById('grid');
+            const btn = document.getElementById('btn');
 
-            if(!id || !secret) return alert("Enter keys first!");
+            if (!id || !secret) {
+                status.className = "error";
+                status.innerText = "Error: Please enter your ID and Secret.";
+                return;
+            }
 
+            btn.disabled = true;
+            status.className = "";
             grid.innerHTML = "";
-            let tracks = [];
+            let allTracks = [];
 
             try {
-                // 1. Get Token
-                const auth = await fetch('https://accounts.spotify.com/api/token', {
+                // 1. GET TOKEN
+                const authRes = await fetch('https://accounts.spotify.com/api/token', {
                     method: 'POST',
                     headers: {
                         'Authorization': 'Basic ' + btoa(id + ':' + secret),
@@ -47,33 +66,54 @@
                     },
                     body: 'grant_type=client_credentials'
                 });
-                const { access_token } = await auth.json();
 
-                // 2. Loop 10 times (10 songs per request to avoid "Invalid Limit" 400 error)
+                if (!authRes.ok) throw new Error("Authentication Failed. Check your credentials.");
+                const { access_token } = await authRes.json();
+
+                // 2. FETCH 100 SONGS IN BATCHES OF 10
                 for (let i = 0; i < 10; i++) {
-                    status.innerText = `Loading... ${ (i+1) * 10 }%`;
+                    status.innerText = `Fetching: ${ (i + 1) * 10 }%`;
                     
-                    const res = await fetch(`https://api.spotify.com/v1/search?q=year:2026&type=track&limit=10&offset=$${i * 10}`, {
+                    const res = await fetch(`https://api.spotify.com/v1/search?q=year:2026&type=track&limit=10&offset=${i * 10}`, {
                         headers: { 'Authorization': 'Bearer ' + access_token }
                     });
-                    
+
+                    if (!res.ok) {
+                        const errData = await res.json();
+                        throw new Error(`API Error: ${errData.error.message}`);
+                    }
+
                     const data = await res.json();
-                    if (data?.tracks?.items) {
-                        tracks = [...tracks, ...data.tracks.items];
-                        // Render as they come in
-                        grid.innerHTML = tracks.map(t => `
-                            <div class="card">
-                                <img src="${t.album?.images[0]?.url || ''}">
-                                <div style="font-weight:bold; margin-top:5px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${t.name}</div>
-                                <div style="color:gray;">${t.artists[0].name}</div>
-                            </div>
-                        `).join('');
+                    
+                    if (data?.tracks?.items?.length > 0) {
+                        allTracks = [...allTracks, ...data.tracks.items];
+                        // Immediate rendering so you see them appear
+                        render(allTracks);
+                    } else {
+                        throw new Error("No tracks returned from Spotify.");
                     }
                 }
-                status.innerText = "Loaded 100 songs successfully.";
+                status.innerText = `Successfully loaded ${allTracks.length} tracks.`;
             } catch (e) {
-                status.innerText = "Error: " + e.message;
+                status.className = "error";
+                status.innerText = e.message;
+                console.error("Full Debug Info:", e);
+            } finally {
+                btn.disabled = false;
             }
+        }
+
+        function render(tracks) {
+            const grid = document.getElementById('grid');
+            grid.innerHTML = tracks.map(t => `
+                <div class="card">
+                    <img src="${t.album?.images?.[0]?.url || ''}" onerror="this.src='https://via.placeholder.com/160?text=No+Cover'">
+                    <div style="font-weight:bold; margin-top:8px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${t.name}">
+                        ${t.name || 'Unknown'}
+                    </div>
+                    <div style="color:gray; font-size:0.7rem;">${t.artists?.[0]?.name || 'Unknown Artist'}</div>
+                </div>
+            `).join('');
         }
     </script>
 </body>
