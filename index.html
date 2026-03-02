@@ -117,7 +117,7 @@ function applyTheme() {
     ].forEach((o,i) => {
         const el = document.getElementById(o.id);
         const sz = RI(400,650), blur = RI(90,140);
-        const op = R(0.30,0.55).toFixed(2);
+        const op = R(0.30,0.48).toFixed(2);
         const sat = RI(65,100), lit = RI(48,68), dur = RI(15,28);
         el.style.cssText = `
             position:fixed;border-radius:50%;z-index:0;pointer-events:none;
@@ -149,9 +149,9 @@ function applyTheme() {
     // Button
     const btn = document.getElementById('main-btn');
     const bH2 = (h1+RI(25,80))%360;
-    btn.style.background = `linear-gradient(135deg, ${hsl(h1,aS,aL)}, ${hsl(bH2,aS-10,aL-8)})`;
-    btn.style.boxShadow  = `0 12px 35px ${hsla(h1,aS,aL,0.45)}`;
-    btn.style.color      = aL > 54 ? '#000' : '#fff';
+    btn.style.background = `linear-gradient(135deg, #1DB954, #16a34a)`;
+btn.style.boxShadow  = `0 12px 35px rgba(29, 185, 84, 0.45)`;
+btn.style.color      = `#000`;
 
     document.getElementById('status').style.color = hsl(h1,aS,aL);
     THEME = {h1,h2,h3,aS,aL};
@@ -226,3 +226,4 @@ setInterval(fetchSpotify, 600_000);
 </script>
 </body>
 </html>
+
