@@ -4,8 +4,13 @@ module.exports = (req, res) => {
     const client_id = process.env.SPOTIFY_CLIENT_ID;
     const client_secret = process.env.SPOTIFY_CLIENT_SECRET;
     
-    // TIER 1: Spotify (if credentials exist)
     if (client_id && client_secret) {
+        trySpotify();
+    } else {
+        tryYouTube();
+    }
+    
+    function trySpotify() {
         const auth = Buffer.from(client_id + ':' + client_secret).toString('base64');
         
         fetch('https://accounts.spotify.com/api/token', {
@@ -17,44 +22,60 @@ module.exports = (req, res) => {
             body: 'grant_type=client_credentials'
         })
         .then(r => r.json())
-        .then(tokenData => {
-            const token = tokenData.access_token;
-            
-            // Spotify Categories (Client Credentials SAFE)
-            fetch('https://api.spotify.com/v1/browse/categories/pop/tracks?limit=12', {
+        .then(data => {
+            const token = data.access_token;
+            fetch('https://api.spotify.com/v1/browse/new-releases?limit=12', {
                 headers: { 'Authorization': 'Bearer ' + token }
             })
-            .then(r => r.ok ? r.json() : Promise.reject())
+            .then(r => r.json())
             .then(data => {
-                const albums = data.tracks.items.map(item => ({
-                    name: item.name,
-                    artists: item.artists,
-                    images: item.album.images,
-                    external_urls: item.external_urls
+                const albums = data.albums.items.slice(0,12).map(album => ({
+                    name: album.name,
+                    artists: album.artists.map(a => a.name),
+                    album: album.name,
+                    genre: album.genres?.[0] || 'Pop',
+                    duration: formatDuration(album.duration_ms || 180000),
+                    duration_ms: album.duration_ms || 180000,
+                    release_year: new Date(album.release_date).getFullYear(),
+                    images: album.images,
+                    external_urls: album.external_urls
                 }));
-                res.json({ albums });
+                sendCleanResponse(albums);
             })
-            .catch(() => youtubeFallback(res));
+            .catch(() => tryYouTube());
         })
-        .catch(() => youtubeFallback(res));
-    } else {
-        youtubeFallback(res);
+        .catch(() => tryYouTube());
     }
     
-    // TIER 2: YouTube Trending Music (Public API)
-    function youtubeFallback(res) {
-        // YouTube Data API v3 - Trending Music Videos
-        fetch(`https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=12&q=music&type=video&videoCategoryId=10&order=viewCount&key=${process.env.YOUTUBE_API_KEY || ''}`)
+    function tryYouTube() {
+        fetch('https://youtube.googleapis.com/youtube/v3/search?part=snippet&maxResults=12&q=trending+music&type=video&videoCategoryId=10')
         .then(r => r.json())
         .then(data => {
-            const albums = data.items.map(item => ({
-                name: item.snippet.title.split(' - ')[0] || item.snippet.title,
-                artists: [{ name: item.snippet.title.split(' - ')[1] || 'Artist' }],
-                images: [{ url: item.snippet.thumbnails.medium.url }],
-                external_urls: { youtube: `https://youtube.com/watch?v=${item.id.videoId}` }
-            }));
-            res.json({ albums });
+            const albums = data.items
+                .map(item => ({
+                    name: item.snippet.title.split(' - ')[0] || item.snippet.title,
+                    artists: [item.snippet.channelTitle],
+                    album: 'Single',
+                    genre: 'Music',
+                    duration: '3:30',
+                    duration_ms: 210000,
+                    release_year: new Date().getFullYear(),
+                    images: [{ url: item.snippet.thumbnails.medium.url }],
+                    external_urls: { youtube: `https://youtube.com/watch?v=${item.id.videoId}` }
+                }))
+                .filter(item => item.images[0] && item.images[0].url);
+            sendCleanResponse(albums.slice(0,12));
         })
-        .catch(() => res.json({ albums: [] }));
+        .catch(() => sendCleanResponse([]));
+    }
+    
+    function formatDuration(ms) {
+        const minutes = Math.floor(ms / 60000);
+        const seconds = Math.floor((ms % 60000) / 1000);
+        return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+    }
+    
+    function sendCleanResponse(albums) {
+        res.json({ albums });
     }
 };
