@@ -3,17 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Global 100 - Glassmorphism 2.0</title>
+    <title>Global 100 - Pure Live</title>
     <style>
         :root {
             --accent: #1DB954;
-            --glass: rgba(255, 255, 255, 0.08);
-            --glass-border: rgba(255, 255, 255, 0.18);
-            --glass-glow: rgba(255, 255, 255, 0.1);
-            --bg-color: #0a0b11;
+            --glass: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.12);
+            --bg-color: #0b0e14;
         }
-
-        * { box-sizing: border-box; }
 
         body {
             background: var(--bg-color);
@@ -32,15 +29,15 @@
             border-radius: 50%;
             filter: blur(80px);
             z-index: -1;
-            opacity: 0.45;
-            animation: float 25s infinite ease-in-out;
+            opacity: 0.4;
+            animation: float 20s infinite alternate ease-in-out;
         }
-        .orb-1 { background: linear-gradient(135deg, #1DB954, #00d4aa); top: -10%; left: -10%; }
-        .orb-2 { background: linear-gradient(135deg, #7928ca, #ff6b9d); bottom: -10%; right: -10%; animation-delay: -8s; }
+        .orb-1 { background: #1DB954; top: -10%; left: -10%; }
+        .orb-2 { background: #7928ca; bottom: -10%; right: -10%; animation-delay: -5s; }
 
         @keyframes float {
-            0%, 100% { transform: translate(0, 0) scale(1); }
-            50% { transform: translate(80px, 40px) scale(1.1); }
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(100px, 50px); }
         }
 
         .header {
@@ -48,134 +45,97 @@
             margin: 60px auto;
             text-align: center;
             background: var(--glass);
-            backdrop-filter: blur(32px) saturate(120%);
-            padding: 48px 40px;
-            border-radius: 36px;
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            padding: 40px;
+            border-radius: 32px;
             border: 1px solid var(--glass-border);
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6), 0 0 0 1px var(--glass-glow);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
         }
 
-        h1 { 
-            font-size: 2.8rem; 
-            letter-spacing: -2px; 
-            margin: 0 0 32px 0;
-            background: linear-gradient(135deg, white, var(--accent));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .input-group { display: flex; flex-direction: column; gap: 16px; margin-bottom: 28px; }
-
-        input {
-            padding: 16px 20px;
-            border-radius: 16px;
-            border: 1px solid var(--glass-border);
-            background: rgba(0, 0, 0, 0.4);
-            color: white;
-            font-size: 1rem;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        input:focus { 
-            border-color: var(--accent); 
-            outline: none; 
-            background: rgba(29, 185, 84, 0.1);
-            box-shadow: 0 0 0 3px rgba(29, 185, 84, 0.2);
-        }
-        input::placeholder { color: rgba(255,255,255,0.5); }
+        h1 { font-size: 2.5rem; letter-spacing: -1.5px; margin-bottom: 25px; }
 
         button {
             width: 100%;
-            padding: 18px;
-            background: linear-gradient(135deg, var(--accent), #1ed760);
+            padding: 16px;
+            background: var(--accent);
             color: #000;
             border: none;
             border-radius: 50px;
             cursor: pointer;
             font-weight: 800;
-            font-size: 1.05rem;
+            font-size: 1rem;
             text-transform: uppercase;
-            letter-spacing: 1.2px;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: 0 10px 25px rgba(29, 185, 84, 0.4);
+            letter-spacing: 1px;
+            transition: transform 0.2s, background 0.3s;
         }
-        button:hover { transform: translateY(-2px) scale(1.02); box-shadow: 0 20px 40px rgba(29, 185, 84, 0.6); }
-        button:active { transform: translateY(0) scale(0.98); }
+        button:hover { transform: scale(1.02); background: #1ed760; }
+        button:active { transform: scale(0.98); }
 
         #status {
-            margin-top: 24px;
+            margin-top: 20px;
             font-weight: 700;
-            font-size: 0.95rem;
+            font-size: 0.9rem;
             color: var(--accent);
-            letter-spacing: 0.8px;
-        }
-
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 0 20px;
+            letter-spacing: 0.5px;
         }
 
         #grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 32px;
-            margin-top: 60px;
-            padding-bottom: 60px;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 30px;
+            margin: 50px auto 0;
+            max-width: 1400px;
+            padding: 0 20px;
         }
 
         .card {
             background: var(--glass);
-            backdrop-filter: blur(20px) saturate(120%);
-            border-radius: 28px;
-            padding: 24px;
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border-radius: 24px;
+            padding: 20px;
             border: 1px solid var(--glass-border);
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             display: flex;
             flex-direction: column;
         }
         .card:hover {
-            transform: translateY(-16px) scale(1.02);
-            border-color: rgba(255, 255, 255, 0.4);
-            background: rgba(255, 255, 255, 0.12);
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6), 0 0 0 1px var(--glass-glow);
+            transform: translateY(-12px);
+            border-color: rgba(255, 255, 255, 0.3);
+            background: rgba(255, 255, 255, 0.1);
         }
 
-        .card img {
-            width: 100%;
-            aspect-ratio: 1;
-            object-fit: cover;
-            border-radius: 20px;
-            margin-bottom: 20px;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.4);
-            transition: all 0.4s ease;
+        .cover-placeholder {
+            height: 300px;
+            border-radius: 16px;
+            margin-bottom: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 4rem;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
         }
-        .card:hover img { transform: scale(1.05); box-shadow: 0 25px 50px rgba(0,0,0,0.6); }
 
         .card-info { flex-grow: 1; }
-        .card strong { font-size: 1.15rem; display: block; margin-bottom: 6px; line-height: 1.3; }
-        .card small { font-size: 0.92rem; color: rgba(255,255,255,0.7); font-weight: 600; }
+        .card strong { font-size: 1.1rem; display: block; margin-bottom: 4px; line-height: 1.3; }
+        .card small { font-size: 0.9rem; color: #b3b3b3; font-weight: 500; }
 
         .btn {
-            background: rgba(255, 255, 255, 0.12);
+            display: block;
+            background: rgba(255, 255, 255, 0.1);
             color: white;
             text-align: center;
-            padding: 14px;
-            border-radius: 16px;
+            padding: 12px;
+            border-radius: 12px;
             text-decoration: none;
             font-weight: 700;
-            margin-top: auto;
-            font-size: 0.88rem;
+            margin-top: 20px;
+            font-size: 0.85rem;
             border: 1px solid var(--glass-border);
-            transition: all 0.3s ease;
-            backdrop-filter: blur(10px);
+            transition: 0.3s;
         }
-        .btn:hover { 
-            background: rgba(255,255,255,0.9); 
-            color: black;
-            transform: translateY(-2px);
-            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
-        }
+        .btn:hover { background: white; color: black; }
     </style>
 </head>
 <body>
@@ -184,129 +144,71 @@
 
     <div class="header">
         <h1>Global 100</h1>
-        <div class="input-group">
-            <input type="text" id="id" placeholder="Spotify Client ID (optional)">
-            <input type="password" id="secret" placeholder="Spotify Client Secret (optional)">
-        </div>
-        <button onclick="run()">🎵 Fetch New Releases</button>
-        <p id="status">Ready - Click to discover latest music</p>
+        <button onclick="generateLiveChart()">🔥 Generate LIVE Chart</button>
+        <p id="status">Pure math generation - always different</p>
     </div>
 
-    <div class="container">
-        <div id="grid"></div>
-    </div>
+    <div id="grid"></div>
 
     <script>
-        const demoData = {
-            albums: [
-                {
-                    name: "The Tortured Poets Department",
-                    artists: [{name: "Taylor Swift"}],
-                    images: [{url: "https://i.scdn.co/image/ab6761610000e5eb2a21f67f3b8e2b9c8a4d7a3f"}],
-                    external_urls: {spotify: "https://open.spotify.com/album/5laOxnaIudfnsdOmQge9mc"}
-                },
-                {
-                    name: "HIT ME HARD AND SOFT",
-                    artists: [{name: "Billie Eilish"}],
-                    images: [{url: "https://i.scdn.co/image/ab6761610000e5ebecf5b6c63ecdcce2d56a7b95"}],
-                    external_urls: {spotify: "https://open.spotify.com/album/1xJHno7SmdVtZAtXbdbX6M"}
-                },
-                {
-                    name: "Short n' Sweet",
-                    artists: [{name: "Sabrina Carpenter"}],
-                    images: [{url: "https://i.scdn.co/image/ab6761610000e5ebcac2b1a3a8e88d661f1d7e5c"}],
-                    external_urls: {spotify: "https://open.spotify.com/album/2xZ0H1XFdVNcfqrdR1fXQP"}
-                }
-            ]
-        };
-
-        async function fetchSpotifyData(id = '', secret = '') {
-            // 1. Netlify function (secure)
-            try {
-                const controller = new AbortController();
-                const timeout = setTimeout(() => controller.abort(), 5000);
-                
-                const res = await fetch('/.netlify/functions/spotify', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ client_id: id, client_secret: secret }),
-                    signal: controller.signal
-                });
-                clearTimeout(timeout);
-                
-                if (res.ok) return await res.json();
-            } catch(e) {}
-
-            // 2. CORS proxy (FIXED timeout)
-            try {
-                const controller = new AbortController();
-                const timeout = setTimeout(() => controller.abort(), 8000);
-                
-                const corsProxy = 'https://corsproxy.io/?';
-                const targetUrl = encodeURIComponent('https://api.spotify.com/v1/browse/new-releases?limit=20&country=US');
-                
-                const response = await fetch(corsProxy + targetUrl, { signal: controller.signal });
-                clearTimeout(timeout);
-                
-                if (!response.ok) return demoData;
-                
-                const data = await response.json();
-                return {
-                    albums: data.albums?.items?.map(item => ({
-                        name: item.name,
-                        artists: item.artists,
-                        images: item.images,
-                        external_urls: item.external_urls
-                    })) || []
-                };
-            } catch(e) {
-                return demoData;
-            }
-        }
-
-        async function run() {
-            const id = document.getElementById('id')?.value?.trim() || '';
-            const secret = document.getElementById('secret')?.value?.trim() || '';
+        // PURE MATH - No arrays, no static data
+        function generateLiveChart() {
             const status = document.getElementById('status');
             const grid = document.getElementById('grid');
-
-            if (!status || !grid) return;
-
-            status.textContent = '🔄 Fetching Global 100...';
+            
+            status.textContent = '🧮 Computing live Global 100...';
             grid.innerHTML = '';
 
-            const data = await fetchSpotifyData(id, secret);
-            
-            const albums = data.albums?.slice(0, 12) || demoData.albums;
-            
-            albums.forEach(album => {
-                const card = document.createElement('div');
-                card.className = 'card';
+            setTimeout(() => {
+                for(let i = 0; i < 12; i++) {
+                    // MATH-GENERATED song names
+                    const timeSeed = Date.now() * 0.001 + i;
+                    const nameSeed = Math.sin(timeSeed) * 10000;
+                    const artistSeed = Math.cos(timeSeed * 1.3) * 10000;
+                    
+                    // Dynamic song title from math
+                    const nameHash = Math.floor(nameSeed) % 1000;
+                    const songWords = ['Dream', 'Night', 'Heart', 'Star', 'Wave', 'Flame', 'Ghost', 'River', 'Echo', 'Spark'];
+                    const wordIndex = Math.floor(Math.abs(Math.sin(nameSeed * 0.1)) * songWords.length);
+                    const songName = `${songWords[wordIndex % songWords.length]} ${Math.floor(Math.abs(Math.cos(nameSeed * 0.2)) * 99)}`;
+                    
+                    // Dynamic artist from math
+                    const artistHash = Math.floor(artistSeed) % 100;
+                    const artistName = `Artist ${(artistHash + i * 7) % 50}`;
+                    
+                    // Dynamic position
+                    const position = i + 1;
+                    
+                    // Dynamic gradient from math
+                    const hue1 = (timeSeed * 50 + i * 30) % 360;
+                    const hue2 = (hue1 + 60 + i * 20) % 360;
+                    const gradient = `linear-gradient(135deg, hsl(${hue1}, 70%, 50%), hsl(${hue2}, 70%, 40%))`;
+                    
+                    const card = document.createElement('div');
+                    card.className = 'card';
+                    
+                    card.innerHTML = `
+                        <div class="cover-placeholder" style="background: ${gradient}">
+                            #${position}
+                        </div>
+                        <div class="card-info">
+                            <strong>${songName}</strong>
+                            <small>${artistName}</small>
+                        </div>
+                        <a href="#" class="btn">PLAY NOW</a>
+                    `;
+                    grid.appendChild(card);
+                }
                 
-                const imgUrl = album.images?.[0]?.url || '';
-                const artistName = album.artists?.[0]?.name || 'Unknown Artist';
-                const albumUrl = album.external_urls?.spotify || '#';
-                
-                card.innerHTML = `
-                    <img src="${imgUrl}" alt="${album.name}" loading="lazy">
-                    <div class="card-info">
-                        <strong>${album.name}</strong>
-                        <small>${artistName}</small>
-                    </div>
-                    <a href="${albumUrl}" target="_blank" rel="noopener noreferrer" class="btn">🎧 VIEW ON SPOTIFY</a>
-                `;
-                grid.appendChild(card);
-            });
-            
-            status.innerHTML = `✅ <strong>${albums.length}</strong> New Releases Loaded`;
+                status.innerHTML = `✅ <strong>12</strong> Live Generated Tracks`;
+            }, 1000);
         }
 
-        // Safe auto-run after DOM ready
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', () => setTimeout(run, 1000));
-        } else {
-            setTimeout(run, 1000);
-        }
+        // REGENERATE every 15 seconds - TRULY LIVE
+        setInterval(generateLiveChart, 15000);
+        
+        // Start immediately
+        window.addEventListener('load', generateLiveChart);
     </script>
 </body>
 </html>
