@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Global 100 - Pure Live</title>
+    <title>Global 100 - Live Spotify</title>
     <style>
         :root {
             --accent: #1DB954;
@@ -54,6 +54,30 @@
         }
 
         h1 { font-size: 2.5rem; letter-spacing: -1.5px; margin-bottom: 25px; }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        input {
+            padding: 14px 18px;
+            border-radius: 14px;
+            border: 1px solid var(--glass-border);
+            background: rgba(0, 0, 0, 0.3);
+            color: white;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+        input:focus {
+            border-color: var(--accent);
+            outline: none;
+            background: rgba(0, 0, 0, 0.5);
+            box-shadow: 0 0 0 3px rgba(29, 185, 84, 0.2);
+        }
+        input::placeholder { color: rgba(255,255,255,0.6); }
 
         button {
             width: 100%;
@@ -106,14 +130,12 @@
             background: rgba(255, 255, 255, 0.1);
         }
 
-        .cover-placeholder {
+        .card img {
+            width: 100%;
             height: 300px;
+            object-fit: cover;
             border-radius: 16px;
             margin-bottom: 18px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 4rem;
             box-shadow: 0 10px 20px rgba(0,0,0,0.3);
         }
 
@@ -144,80 +166,82 @@
 
     <div class="header">
         <h1>Global 100</h1>
-        <button onclick="generateLiveChart()">🔥 Generate LIVE Chart</button>
-        <p id="status">Pure math generation - always different</p>
+        <div class="input-group">
+            <input type="text" id="id" placeholder="Spotify Client ID">
+            <input type="password" id="secret" placeholder="Spotify Client Secret">
+        </div>
+        <button onclick="run()">🎵 Fetch Live Spotify Releases</button>
+        <p id="status">Enter credentials → Click to fetch REAL Spotify data</p>
     </div>
 
     <div id="grid"></div>
 
     <script>
-async function run() {
-    const id = document.getElementById('id')?.value?.trim();
-    const secret = document.getElementById('secret')?.value?.trim();
-    const status = document.getElementById('status');
-    const grid = document.getElementById('grid');
+    async function run() {
+        const id = document.getElementById('id')?.value?.trim();
+        const secret = document.getElementById('secret')?.value?.trim();
+        const status = document.getElementById('status');
+        const grid = document.getElementById('grid');
 
-    if (!id || !secret) {
-        status.textContent = 'Please enter Spotify Client ID and Secret';
-        return;
-    }
-
-    status.textContent = '🎵 Connecting to Spotify...';
-    grid.innerHTML = '';
-
-    try {
-        const response = await fetch('/api/spotify', {
-            method: 'POST',
-            headers: { 
-                'Content-Type': 'application/json',
-                'Accept': 'application/json'
-            },
-            body: JSON.stringify({ client_id: id, client_secret: secret })
-        });
-
-        const data = await response.json();
-
-        if (!response.ok) {
-            throw new Error(data.error || `HTTP ${response.status}`);
-        }
-
-        if (!data.albums?.length) {
-            status.textContent = 'No new releases found';
+        if (!id || !secret) {
+            status.textContent = 'Please enter Spotify Client ID and Secret';
             return;
         }
 
-        data.albums.slice(0, 12).forEach(album => {
-            const card = document.createElement('div');
-            card.className = 'card';
-            
-            const imgUrl = album.images?.[0]?.url || '';
-            const artistName = album.artists?.[0]?.name || 'Unknown Artist';
-            const albumUrl = album.external_urls.spotify || '#';
-            
-            card.innerHTML = `
-                <img src="${imgUrl}" alt="${album.name}" loading="lazy">
-                <div class="card-info">
-                    <strong>${album.name}</strong>
-                    <small>${artistName}</small>
-                </div>
-                <a href="${albumUrl}" target="_blank" rel="noopener noreferrer" class="btn">🎧 PLAY ON SPOTIFY</a>
-            `;
-            grid.appendChild(card);
-        });
+        status.textContent = '🎵 Connecting to Spotify...';
+        grid.innerHTML = '';
 
-        status.innerHTML = `✅ <strong>${data.albums.length}</strong> New Releases Loaded!`;
-    } catch (error) {
-        status.textContent = `❌ ${error.message}`;
-        console.error('Frontend error:', error);
+        try {
+            const response = await fetch('/api/spotify', {
+                method: 'POST',
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({ client_id: id, client_secret: secret })
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.error || `HTTP ${response.status}`);
+            }
+
+            if (!data.albums?.length) {
+                status.textContent = 'No new releases found';
+                return;
+            }
+
+            data.albums.slice(0, 12).forEach(album => {
+                const card = document.createElement('div');
+                card.className = 'card';
+                
+                const imgUrl = album.images?.[0]?.url || '';
+                const artistName = album.artists?.[0]?.name || 'Unknown Artist';
+                const albumUrl = album.external_urls?.spotify || '#';
+                
+                card.innerHTML = `
+                    <img src="${imgUrl}" alt="${album.name}" loading="lazy">
+                    <div class="card-info">
+                        <strong>${album.name}</strong>
+                        <small>${artistName}</small>
+                    </div>
+                    <a href="${albumUrl}" target="_blank" rel="noopener noreferrer" class="btn">🎧 PLAY ON SPOTIFY</a>
+                `;
+                grid.appendChild(card);
+            });
+
+            status.innerHTML = `✅ <strong>${data.albums.length}</strong> New Releases Loaded!`;
+        } catch (error) {
+            status.textContent = `❌ ${error.message}`;
+            console.error('Error:', error);
+        }
     }
-}
 
-// Enter key support
-document.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') run();
-});
-</script>
-
+    // Enter key support
+    document.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') run();
+    });
+    </script>
 </body>
 </html>
-
