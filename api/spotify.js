@@ -1,3 +1,6 @@
+
+console.log('SPOTIFY:', !!spotify_id, !!spotify_secret);
+console.log('YOUTUBE:', !!youtube_key);
 module.exports = (req, res) => {
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
