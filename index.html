@@ -172,7 +172,7 @@
 
 <script>
 async function fetchSpotifyData(id, secret) {
-    // Priority 1: Netlify function (secure, if deployed)
+    // 1. Netlify Function (secure, server-side)
     try {
         const res = await fetch('/.netlify/functions/spotify', {
             method: 'POST',
@@ -182,63 +182,99 @@ async function fetchSpotifyData(id, secret) {
         if (res.ok) return await res.json();
     } catch (e) {}
 
-    // Priority 2: Client-side with auth (allorigins + Client Credentials)
+    // 2. Best public proxy (allorigins - most reliable 2026)
     try {
-        const encoded = btoa(`${id}:${secret}`);
         const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(
-            `https://accounts.spotify.com/api/token?grant_type=client_credentials`
+            'https://api.spotify.com/v1/browse/new-releases?limit=50&country=US'
         )}`;
-        const tokenRes = await fetch(proxyUrl, {
-            headers: { 'Authorization': `Basic ${encoded}` }
-        });
-        const tokenData = await tokenRes.json();
-        const access_token = tokenData.access_token;
-
-        const releasesProxy = `https://api.allorigins.win/raw?url=${encodeURIComponent(
-            `https://api.spotify.com/v1/browse/new-releases?limit=50&country=US`
-        )}`;
-        const releasesRes = await fetch(releasesProxy, {
-            headers: { 'Authorization': `Bearer ${access_token}` }
-        });
-        const json = await releasesRes.json();
+        const res = await fetch(proxyUrl);
+        const json = await res.json();
         return {
-            albums: json.albums.items.map(item => ({
+            albums: json.albums?.items?.map(item => ({
                 name: item.name,
                 artists: item.artists,
                 images: item.images,
                 external_urls: item.external_urls
-            }))
+            })) || []
         };
     } catch (e) {}
 
-    // Priority 3: Pure public fallback (no auth needed for basic new releases)
-    const publicProxies = [
-        'https://api.allorigins.win/get?url=',
+    // 3. Backup proxies
+    const backups = [
         'https://corsproxy.io/?',
         'https://thingproxy.freeboard.io/fetch/'
     ];
-    for (const proxyBase of publicProxies) {
+    
+    for (const base of backups) {
         try {
-            const proxyUrl = `${proxyBase}${encodeURIComponent('https://api.spotify.com/v1/browse/new-releases?limit=20&country=US')}`;
+            const proxyUrl = `${base}${encodeURIComponent('https://api.spotify.com/v1/browse/new-releases?limit=20')}`;
             const res = await fetch(proxyUrl);
-            const text = await res.text();
-            const json = JSON.parse(text.startsWith('{"contents":') ? text.match(/{"contents":"(.+?)"}/)?.[1]?.replace(/\\"/g, '"') : text);
+            let text = await res.text();
+            
+            // Parse various proxy responses
+            if (text.includes('{"contents":')) {
+                text = text.match(/{"contents":"(.+?)"}/s)?.[1]?.replace(/\\"/g, '"') || '{}';
+            }
+            const json = JSON.parse(text);
             return { albums: json.albums?.items || [] };
         } catch (e) {}
     }
 
-    throw new Error('All methods failed. Try valid Spotify credentials or check internet.');
+    throw new Error('GitHub Pages limit reached. Deploy to Netlify for unrestricted access.');
 }
 
 async function run() {
-    // ... (keep the exact same run() body from previous version)
-    // It calls fetchSpotifyData(id, secret) now instead of direct fetch
+    const id = document.getElementById('id').value.trim();
+    const secret = document.getElementById('secret').value.trim();
+    const status = document.getElementById('status');
+    const grid = document.getElementById('grid');
+
+    if (!id || !secret) {
+        status.innerText = 'Please enter both Client ID and Client Secret.';
+        return;
+    }
+
+    status.textContent = 'Fetching new releases...';
+    grid.innerHTML = '';
+
+    try {
+        const data = await fetchSpotifyData(id, secret);
+        
+        if (!data.albums?.length) {
+            status.textContent = 'No new releases found.';
+            return;
+        }
+
+        data.albums.forEach(album => {
+            const card = document.createElement('div');
+            card.className = 'card';
+            const imgUrl = album.images?.[0]?.url || '';
+            const artistName = album.artists?.[0]?.name || 'Unknown';
+            const albumUrl = album.external_urls?.spotify || '#';
+            
+            card.innerHTML = `
+                <img src="${imgUrl}" alt="${album.name}" loading="lazy">
+                <div class="card-info">
+                    <strong>${album.name}</strong>
+                    <small>${artistName}</small>
+                </div>
+                <a href="${albumUrl}" target="_blank" rel="noopener noreferrer" class="btn">VIEW ALBUM</a>
+            `;
+            grid.appendChild(card);
+        });
+
+        status.textContent = `Success: ${data.albums.length} New Releases Loaded.`;
+    } catch (e) {
+        status.textContent = 'Error: ' + e.message;
+    }
 }
 </script>
 
 
+
 </body>
 </html>
+
 
 
 
