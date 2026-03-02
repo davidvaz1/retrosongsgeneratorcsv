@@ -238,6 +238,13 @@ button:active {
     <div id="grid"></div>
 
 <script>
+    function rndInt(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
+function rnd(min, max) { return Math.random() * (max - min) + min; }
+function randomHuePair() {
+    const base = rndInt(0, 359);
+    const offset = [30,60,90,120,150,180,210,240][rndInt(0,7)];
+    return [base, (base + offset) % 360];
+}
 async function fetchSpotify() {
     const status = document.getElementById('status');
     const grid = document.getElementById('grid');
@@ -290,5 +297,6 @@ setInterval(fetchSpotify, 600000);
 
 </body>
 </html>
+
 
 
