@@ -1,1 +1,11 @@
+{
+  "functions": {
+    "api/spotify.js": {
+      "maxDuration": 15
+    }
+  },
+  "rewrites": [
+    { "source": "/api/spotify", "destination": "/api/spotify.js" }
+  ]
+}
 
