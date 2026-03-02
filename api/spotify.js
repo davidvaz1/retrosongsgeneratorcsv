@@ -1,31 +1,19 @@
 module.exports = (req, res) => {
     res.setHeader('Access-Control-Allow-Origin', '*');
     
-    const client_id = process.env.SPOTIFY_CLIENT_ID;
-    const client_secret = process.env.SPOTIFY_CLIENT_SECRET;
-    
-    if (!client_id || !client_secret) {
-        return res.json({ albums: [] });
-    }
-
-    // SINGLE fetch - Today's Top Hits (fastest endpoint)
-    const auth = Buffer.from(`${client_id}:${client_secret}`).toString('base64');
-    
-    fetch('https://accounts.spotify.com/api/token', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-            'Authorization': `Basic ${auth}`
-        },
-        body: 'grant_type=client_credentials'
+    // Spotify Global Top 50 - PUBLIC playlist (NO AUTH NEEDED)
+    fetch('https://api.spotify.com/v1/playlists/37i9dQZEVXbMDoHDwVN2tF/tracks?limit=12', {
+        headers: { 
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+        }
     })
-    .then(r => r.json())
-    .then(token => fetch('https://api.spotify.com/v1/playlists/37i9dQZF1DXcBWIGoYBM5M/tracks?limit=12', {
-        headers: { 'Authorization': `Bearer ${token.access_token}` }
-    }))
-    .then(r => r.json())
+    .then(r => {
+        if (!r.ok) throw new Error(`Spotify failed: ${r.status}`);
+        return r.json();
+    })
     .then(data => {
-        const albums = data.items.slice(0,12).map(item => ({
+        const albums = data.items.slice(0, 12).map(item => ({
             name: item.track.name,
             artists: item.track.artists,
             images: item.track.album.images,
@@ -33,5 +21,8 @@ module.exports = (req, res) => {
         }));
         res.json({ albums });
     })
-    .catch(() => res.json({ albums: [] }));
+    .catch(e => {
+        // If Spotify down, return empty (no fake data)
+        res.status(500).json({ error: 'Spotify temporarily unavailable' });
+    });
 };
