@@ -1,4 +1,4 @@
-
+const fetch = require('node-fetch');
 console.log('SPOTIFY:', !!spotify_id, !!spotify_secret);
 console.log('YOUTUBE:', !!youtube_key);
 module.exports = (req, res) => {
