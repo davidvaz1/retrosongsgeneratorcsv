@@ -1,11 +1,6 @@
 {
-  "functions": {
-    "api/spotify.js": {
-      "maxDuration": 15
-    }
-  },
-  "rewrites": [
-    { "source": "/api/spotify", "destination": "/api/spotify.js" }
-  ]
+  "name": "spotify-global100",
+  "version": "1.0.0",
+  "type": "commonjs",
+  "dependencies": {}
 }
-
