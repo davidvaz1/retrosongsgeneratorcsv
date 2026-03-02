@@ -170,61 +170,86 @@
         <div id="grid"></div>
     </div>
 
-    <script>
-        async function run() {
-            var id = document.getElementById('id').value.trim();
-            var secret = document.getElementById('secret').value.trim();
-            var status = document.getElementById('status');
-            var grid = document.getElementById('grid');
-
-            if (!id || !secret) {
-                status.innerText = 'Please enter both Client ID and Client Secret.';
-                return;
-            }
-
-            status.innerText = 'Syncing with Spotify API...';
-            grid.innerHTML = '';
-
-            try {
-                var res = await fetch('/.netlify/functions/spotify', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ client_id: id, client_secret: secret })
-                });
-
-                var data = await res.json();
-
-                if (!res.ok) {
-                    throw new Error(data.error || 'Error ' + res.status);
-                }
-
-                if (!data.albums || data.albums.length === 0) {
-                    status.innerText = 'No new releases found.';
-                    return;
-                }
-
-                data.albums.forEach(function(album) {
-                    var card = document.createElement('div');
-                    card.className = 'card';
-                    var imgUrl = (album.images && album.images[0] && album.images[0].url) ? album.images[0].url : '';
-                    var artistName = (album.artists && album.artists[0] && album.artists[0].name) ? album.artists[0].name : 'Unknown';
-                    var albumUrl = (album.external_urls && album.external_urls.spotify) ? album.external_urls.spotify : '#';
-                    card.innerHTML =
-                        '<img src="' + imgUrl + '" alt="' + album.name + '" loading="lazy">' +
-                        '<div class="card-info">' +
-                            '<strong>' + album.name + '</strong>' +
-                            '<small>' + artistName + '</small>' +
-                        '</div>' +
-                        '<a href="' + albumUrl + '" target="_blank" rel="noopener noreferrer" class="btn">VIEW ALBUM</a>';
-                    grid.appendChild(card);
-                });
-
-                status.innerText = 'Success: ' + data.albums.length + ' New Releases Loaded.';
-            } catch (e) {
-                status.innerText = 'Connection Failed: ' + e.message;
-            }
+<script>
+async function fetchSpotifyData(id, secret) {
+    // Try Netlify function first (server-side, secure)
+    try {
+        const res = await fetch('/.netlify/functions/spotify', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ client_id: id, client_secret: secret })
+        });
+        if (res.ok) {
+            return await res.json();
         }
-    </script>
+    } catch (e) {
+        // Silently fail to fallback
+    }
+
+    // Fallback: Client-side via CORS proxy (GitHub Pages/public)
+    try {
+        const data = await fetch(`https://api.cors.lol/?url=https://api.spotify.com/v1/browse/new-releases?limit=50&country=US`);
+        if (!data.ok) throw new Error('Proxy failed');
+        const json = await data.json();
+        return {
+            albums: json.albums.items.map(item => ({
+                name: item.name,
+                artists: item.artists,
+                images: item.images,
+                external_urls: item.external_urls
+            }))
+        };
+    } catch (e) {
+        throw new Error('Both methods failed. Check credentials/internet.');
+    }
+}
+
+async function run() {
+    var id = document.getElementById('id').value.trim();
+    var secret = document.getElementById('secret').value.trim();
+    var status = document.getElementById('status');
+    var grid = document.getElementById('grid');
+
+    if (!id || !secret) {
+        status.innerText = 'Please enter both Client ID and Client Secret.';
+        return;
+    }
+
+    status.innerText = 'Syncing with Spotify API...';
+    grid.innerHTML = '';
+
+    try {
+        var data = await fetchSpotifyData(id, secret);
+
+        if (!data.albums || data.albums.length === 0) {
+            status.innerText = 'No new releases found.';
+            return;
+        }
+
+        data.albums.forEach(function(album) {
+            var card = document.createElement('div');
+            card.className = 'card';
+            var imgUrl = (album.images && album.images[0] && album.images[0].url) ? album.images[0].url : '';
+            var artistName = (album.artists && album.artists[0] && album.artists[0].name) ? album.artists[0].name : 'Unknown';
+            var albumUrl = (album.external_urls && album.external_urls.spotify) ? album.external_urls.spotify : '#';
+            card.innerHTML =
+                '<img src="' + imgUrl + '" alt="' + album.name + '" loading="lazy">' +
+                '<div class="card-info">' +
+                    '<strong>' + album.name + '</strong>' +
+                    '<small>' + artistName + '</small>' +
+                '</div>' +
+                '<a href="' + albumUrl + '" target="_blank" rel="noopener noreferrer" class="btn">VIEW ALBUM</a>';
+            grid.appendChild(card);
+        });
+
+        status.innerText = 'Success: ' + data.albums.length + ' New Releases Loaded.';
+    } catch (e) {
+        status.innerText = 'Connection Failed: ' + e.message;
+    }
+}
+</script>
+
 </body>
 </html>
+
 
