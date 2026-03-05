@@ -3,33 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Global 50 - CSV</title>
+    <title>Global 100</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;700;900&display=swap" rel="stylesheet">
     <style>
-        .glass-dynamic {
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  box-shadow: 
-    0 8px 32px rgba(31, 38, 135, 0.37),
-    inset 0 1px 0 rgba(255, 255, 255, 0.3);
-  transition: all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-}
-
-.glass-1 { background: rgba(59, 130, 246, 0.15); border: 1px solid rgba(59, 130, 246, 0.4); }
-.glass-2 { background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.4); }
-.glass-3 { background: rgba(245, 158, 11, 0.15); border: 1px solid rgba(245, 158, 11, 0.4); }
-.glass-4 { background: rgba(236, 72, 153, 0.15); border: 1px solid rgba(236, 72, 153, 0.4); }
-.glass-5 { background: rgba(139, 92, 246, 0.15); border: 1px solid rgba(139, 92, 246, 0.4); }
-
-.glass-hover {
-  transform: translateY(-8px) scale(1.02);
-  box-shadow: 
-    0 25px 50px rgba(31, 38, 135, 0.5),
-    inset 0 1px 0 rgba(255, 255, 255, 0.6);
-}
-
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
         :root {
             --accent: #1DB954; --purple: #7928ca; --bg: #0b0e14;
             --glass: rgba(255,255,255,0.07); --glass-hover: rgba(255,255,255,0.11);
@@ -54,9 +32,12 @@
         @keyframes blink { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.35;transform:scale(0.65)} }
         h1 { font-size: clamp(2.2rem,5vw,3.2rem); font-weight: 900; letter-spacing: -2px; line-height: 1; margin-bottom: 8px; background: linear-gradient(135deg, #fff 25%, rgba(255,255,255,0.52)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; position: relative; z-index: 1; }
         .subtitle { color: var(--dim); font-size: 0.88rem; margin-bottom: 32px; position: relative; z-index: 1; }
-        .drop-zone { position: relative; z-index: 1; border: 2px dashed rgba(29,185,84,0.35); border-radius: 20px; padding: 36px 24px; cursor: pointer; transition: all 0.3s ease; background: rgba(29,185,84,0.04); }
-        .drop-zone:hover, .drop-zone.drag-over { border-color: rgba(29,185,84,0.7); background: rgba(29,185,84,0.09); transform: scale(1.01); }
-        .drop-zone input[type="file"] { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
+        .drop-zone { position: relative; z-index: 1; border: 2px dashed rgba(29,185,84,0.35); border-radius: 20px; padding: 32px 24px; transition: all 0.3s ease; background: rgba(29,185,84,0.04); }
+        .drop-zone.drag-over { border-color: rgba(29,185,84,0.7); background: rgba(29,185,84,0.09); transform: scale(1.01); }
+        #csvInput { display: none; }
+        .browse-btn { display: inline-flex; align-items: center; gap: 8px; margin-top: 16px; padding: 11px 24px; background: linear-gradient(135deg, #1DB954, #17a347); color: #000; border: none; border-radius: 50px; cursor: pointer; font-weight: 800; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; transition: all 0.25s; box-shadow: 0 6px 20px rgba(29,185,84,0.35); }
+        .browse-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(29,185,84,0.5); }
+        .browse-btn:active { transform: scale(0.97); }
         .drop-icon { font-size: 2.8rem; margin-bottom: 10px; }
         .drop-label { font-size: 0.95rem; font-weight: 700; color: rgba(255,255,255,0.8); margin-bottom: 6px; }
         .drop-hint { font-size: 0.76rem; color: var(--dim); line-height: 1.6; }
@@ -129,14 +110,16 @@
             <div class="badge"><div class="badge-dot"></div> Your Library</div>
             <h1>Global 100</h1>
             <p class="subtitle">Drop your CSV — 50 random retro tracks, shuffled every time</p>
+            <!-- hidden real input, triggered by JS -->
+            <input type="file" id="csvInput" accept=".csv">
             <div class="drop-zone" id="dropZone">
-                <input type="file" id="csvInput" accept=".csv">
                 <div class="drop-icon">📂</div>
-                <div class="drop-label" id="dropLabel">Drop your CSV here, or click to browse</div>
+                <div class="drop-label" id="dropLabel">Drag &amp; drop your CSV here</div>
                 <div class="drop-hint" style="margin-top:8px;">
                     Columns: <code>Name</code> <code>Artist</code> <code>Album</code> <code>Year</code>
                     <code>DurationSeconds</code> <code>Genre</code> <code>SpotifyLink</code> <code>YouTubeMusicLink</code>
                 </div>
+                <button class="browse-btn" onclick="document.getElementById('csvInput').click()">📁 &nbsp;Browse File</button>
             </div>
             <div id="filter-bar"></div>
             <div id="status">Waiting for CSV…</div>
@@ -361,4 +344,33 @@ function handleFile(file){
 
 function setStatus(cls,msg){const el=document.getElementById('status');el.className=cls;el.innerHTML=msg;}
 
+// File input change (triggered by Browse button)
+document.getElementById('csvInput').addEventListener('change',function(e){
+    if(e.target.files&&e.target.files[0])handleFile(e.target.files[0]);
+    // Reset so same file can be re-uploaded
+    this.value='';
+});
 
+// Drag and drop on the drop zone
+const dz=document.getElementById('dropZone');
+dz.addEventListener('dragenter',e=>{e.preventDefault();e.stopPropagation();dz.classList.add('drag-over');});
+dz.addEventListener('dragover',e=>{e.preventDefault();e.stopPropagation();dz.classList.add('drag-over');});
+dz.addEventListener('dragleave',e=>{e.preventDefault();e.stopPropagation();dz.classList.remove('drag-over');});
+dz.addEventListener('drop',e=>{
+    e.preventDefault();e.stopPropagation();
+    dz.classList.remove('drag-over');
+    const files=e.dataTransfer.files;
+    if(files&&files[0])handleFile(files[0]);
+});
+
+// Also allow drag-drop on the whole page body as fallback
+document.body.addEventListener('dragover',e=>e.preventDefault());
+document.body.addEventListener('drop',e=>{
+    e.preventDefault();
+    const files=e.dataTransfer.files;
+    if(files&&files[0]&&files[0].name.toLowerCase().endsWith('.csv'))handleFile(files[0]);
+});
+window.addEventListener('scroll',()=>{document.getElementById('scrolltop').classList.toggle('show',window.scrollY>400);});
+</script>
+</body>
+</html>
