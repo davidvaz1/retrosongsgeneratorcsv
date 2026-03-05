@@ -212,9 +212,27 @@ function fixSpaces(s){
     return word.replace(/\b\w/g,c=>c.toUpperCase());
 }
 
+/* ── ENCODING SANITIZATION ── */
+function sanitizeUTF8(text){
+    // Remove UTF-8 BOM if present
+    if(text.charCodeAt(0)===0xFEFF){text=text.slice(1);}
+    // Remove null bytes and control characters
+    text=text.replace(/\0/g,'');
+    // Normalize line breaks
+    text=text.replace(/\r\n/g,'\n').replace(/\r/g,'\n');
+    // Handle form feeds
+    text=text.replace(/\f/g,'\n');
+    // Replace invalid UTF-8 sequences with safe character
+    text=text.replace(/[\uFFFD]/g,'?');
+    // Trim leading/trailing whitespace
+    return text.trim();
+}
+
 /* ── CSV PARSER ── */
 function parseRetroCSV(text){
-    text=text.replace(/\r\n/g,'\n').replace(/\r/g,'\n').replace(/\f/g,'\n');
+    // Sanitize encoding issues first
+    text=sanitizeUTF8(text);
+    
     const lines=text.split('\n');
     const stripped=lines.map(l=>{let s=l.trim();if(s.startsWith('"')&&s.endsWith('"'))s=s.slice(1,-1);return s;});
     const blocks=[];let cur=[];
@@ -225,8 +243,14 @@ function parseRetroCSV(text){
     function parseRow(row){
         const r=row.replace(/""/g,'"');
         const f=[];let field='',inQ=false;
-        for(let i=0;i<r.length;i++){const c=r[i];if(c==='"'){inQ=!inQ;continue;}if(c===','&&!inQ){f.push(field.trim());field='';continue;}field+=c;}
-        f.push(field.trim());return f;
+        for(let i=0;i<r.length;i++){
+            const c=r[i];
+            if(c==='"'){inQ=!inQ;continue;}
+            if(c===','&&!inQ){f.push(field.trim());field='';continue;}
+            field+=c;
+        }
+        f.push(field.trim());
+        return f;
     }
 
     const hdr=parseRow(blocks[0]).map(h=>h.toLowerCase().replace(/[^a-z0-9]/g,''));
@@ -435,10 +459,10 @@ function setStatus(cls,msg){const el=document.getElementById('status');el.classN
 document.getElementById('csvInput').addEventListener('change',function(e){
     if(e.target.files&&e.target.files[0]){
         const file=e.target.files[0];
-        displayFileName(file);   // read name BEFORE value reset
+        displayFileName(file);
         handleFile(file);
     }
-    this.value='';               // reset so same file can be re-uploaded
+    this.value='';
 });
 
 const dz=document.getElementById('dropZone');
@@ -449,7 +473,7 @@ dz.addEventListener('drop',e=>{
     e.preventDefault();e.stopPropagation();dz.classList.remove('drag-over');
     if(e.dataTransfer.files&&e.dataTransfer.files[0]){
         const file=e.dataTransfer.files[0];
-        displayFileName(file);   // also update badge on drag-and-drop
+        displayFileName(file);
         handleFile(file);
     }
 });
