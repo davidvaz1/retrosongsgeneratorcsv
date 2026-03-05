@@ -7,7 +7,29 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;700;900&display=swap" rel="stylesheet">
     <style>
-        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        .glass-dynamic {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 
+    0 8px 32px rgba(31, 38, 135, 0.37),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  transition: all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.glass-1 { background: rgba(59, 130, 246, 0.15); border: 1px solid rgba(59, 130, 246, 0.4); }
+.glass-2 { background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.4); }
+.glass-3 { background: rgba(245, 158, 11, 0.15); border: 1px solid rgba(245, 158, 11, 0.4); }
+.glass-4 { background: rgba(236, 72, 153, 0.15); border: 1px solid rgba(236, 72, 153, 0.4); }
+.glass-5 { background: rgba(139, 92, 246, 0.15); border: 1px solid rgba(139, 92, 246, 0.4); }
+
+.glass-hover {
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: 
+    0 25px 50px rgba(31, 38, 135, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.6);
+}
+
         :root {
             --accent: #1DB954; --purple: #7928ca; --bg: #0b0e14;
             --glass: rgba(255,255,255,0.07); --glass-hover: rgba(255,255,255,0.11);
@@ -339,12 +361,4 @@ function handleFile(file){
 
 function setStatus(cls,msg){const el=document.getElementById('status');el.className=cls;el.innerHTML=msg;}
 
-document.getElementById('csvInput').addEventListener('change',e=>handleFile(e.target.files[0]));
-const dz=document.getElementById('dropZone');
-dz.addEventListener('dragover',e=>{e.preventDefault();dz.classList.add('drag-over');});
-dz.addEventListener('dragleave',()=>dz.classList.remove('drag-over'));
-dz.addEventListener('drop',e=>{e.preventDefault();dz.classList.remove('drag-over');handleFile(e.dataTransfer.files[0]);});
-window.addEventListener('scroll',()=>{document.getElementById('scrolltop').classList.toggle('show',window.scrollY>400);});
-</script>
-</body>
-</html>
+
