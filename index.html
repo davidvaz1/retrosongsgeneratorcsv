@@ -3,7 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Global 100 - Live Spotify</title>
+    <title>Global 50 - CSV</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;700;900&display=swap" rel="stylesheet">
     <style>
         .glass-dynamic {
   background: rgba(255, 255, 255, 0.1);
@@ -29,290 +31,334 @@
 }
 
         :root {
-    --accent: #1DB954;
-    --glass-light: rgba(255, 255, 255, 0.08);
-    --glass-border-light: rgba(255, 255, 255, 0.18);
-    --glass-border-hover: rgba(255, 255, 255, 0.35);
-    --bg-color: #0b0e14;
-    --shadow-sm: 0 8px 32px rgba(0, 0, 0, 0.1);
-    --shadow-md: 0 20px 60px rgba(0, 0, 0, 0.3);
-    --shadow-lg: 0 25px 80px -15px rgba(29, 185, 84, 0.2);
-}
-
-body {
-    background: var(--bg-color);
-    color: white;
-    font-family: 'Inter', system-ui, -apple-system, sans-serif;
-    margin: 0;
-    padding: 20px;
-    min-height: 100vh;
-    overflow-x: hidden;
-}
-
-.orb {
-    position: fixed;
-    width: 500px;
-    height: 500px;
-    border-radius: 50%;
-    filter: blur(100px);
-    z-index: -1;
-    opacity: 0.35;
-    animation: float 20s infinite alternate ease-in-out;
-}
-
-.orb-1 {
-    background: #1DB954;
-    top: -10%;
-    left: -10%;
-}
-
-.orb-2 {
-    background: #7928ca;
-    bottom: -10%;
-    right: -10%;
-    animation-delay: -5s;
-}
-
-@keyframes float {
-    0% { transform: translate(0, 0); }
-    100% { transform: translate(100px, 50px); }
-}
-
-.header {
-    max-width: 550px;
-    margin: 60px auto;
-    text-align: center;
-    background: linear-gradient(135deg, var(--glass-light), rgba(255, 255, 255, 0.04));
-    backdrop-filter: blur(30px);
-    -webkit-backdrop-filter: blur(30px);
-    padding: 40px;
-    border-radius: 32px;
-    border: 1.5px solid var(--glass-border-light);
-    box-shadow: inset 0 2px 8px rgba(255, 255, 255, 0.08), var(--shadow-lg);
-    position: relative;
-    overflow: hidden;
-}
-
-.header::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: radial-gradient(circle at 30% 30%, rgba(29, 185, 84, 0.1), transparent 50%);
-    pointer-events: none;
-}
-
-h1 {
-    font-size: 2.5rem;
-    letter-spacing: -1.5px;
-    margin-bottom: 25px;
-    position: relative;
-    z-index: 1;
-}
-
-button {
-    width: 100%;
-    padding: 16px;
-    background: linear-gradient(135deg, var(--accent), #16a34a);
-    color: #000;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 50px;
-    cursor: pointer;
-    font-weight: 800;
-    font-size: 1rem;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-    box-shadow: 0 10px 30px rgba(29, 185, 84, 0.3);
-    position: relative;
-    z-index: 1;
-}
-
-button:hover {
-    transform: translateY(-2px) scale(1.02);
-    background: linear-gradient(135deg, #1ed760, #20b74f);
-    box-shadow: 0 15px 40px rgba(29, 185, 84, 0.4);
-}
-
-button:active {
-    transform: translateY(0) scale(0.98);
-}
-
-#status {
-    margin-top: 20px;
-    font-weight: 700;
-    font-size: 0.9rem;
-    color: var(--accent);
-    letter-spacing: 0.5px;
-    position: relative;
-    z-index: 1;
-}
-
-#grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 30px;
-    margin: 50px auto 0;
-    max-width: 1400px;
-    padding: 0 20px;
-}
-
-.card {
-    background: linear-gradient(135deg, var(--glass-light), rgba(255, 255, 255, 0.03));
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border-radius: 24px;
-    padding: 20px;
-    border: 1.5px solid var(--glass-border-light);
-    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    display: flex;
-    flex-direction: column;
-    box-shadow: inset 0 1.5px 4px rgba(255, 255, 255, 0.06), var(--shadow-sm);
-    position: relative;
-    overflow: hidden;
-}
-
-.card::before {
-    content: '';
-    position: absolute;
-    top: -50%;
-    right: -50%;
-    width: 200%;
-    height: 200%;
-    background: radial-gradient(circle, rgba(29, 185, 84, 0.08), transparent 70%);
-    pointer-events: none;
-}
-
-.card:hover {
-    transform: translateY(-12px);
-    border-color: var(--glass-border-hover);
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.05));
-    box-shadow: inset 0 1.5px 4px rgba(255, 255, 255, 0.1), var(--shadow-md);
-}
-
-.card img {
-    width: 100%;
-    height: 300px;
-    object-fit: cover;
-    border-radius: 16px;
-    margin-bottom: 18px;
-    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
-    position: relative;
-    z-index: 1;
-}
-
-.card-info {
-    flex-grow: 1;
-    position: relative;
-    z-index: 1;
-}
-
-.card strong {
-    font-size: 1.1rem;
-    display: block;
-    margin-bottom: 4px;
-    line-height: 1.3;
-}
-
-.card small {
-    font-size: 0.9rem;
-    color: #b3b3b3;
-    font-weight: 500;
-}
-
-.btn {
-    display: block;
-    background: linear-gradient(135deg, rgba(29, 185, 84, 0.2), rgba(121, 40, 202, 0.1));
-    color: white;
-    text-align: center;
-    padding: 12px;
-    border-radius: 12px;
-    text-decoration: none;
-    font-weight: 700;
-    margin-top: 20px;
-    font-size: 0.85rem;
-    border: 1.5px solid var(--glass-border-light);
-    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-    position: relative;
-    z-index: 1;
-    backdrop-filter: blur(10px);
-}
-
-.btn:hover {
-    background: linear-gradient(135deg, rgba(29, 185, 84, 0.4), rgba(121, 40, 202, 0.2));
-    border-color: var(--glass-border-hover);
-    box-shadow: 0 8px 20px rgba(29, 185, 84, 0.25);
-    transform: translateY(-2px);
-}
+            --accent: #1DB954; --purple: #7928ca; --bg: #0b0e14;
+            --glass: rgba(255,255,255,0.07); --glass-hover: rgba(255,255,255,0.11);
+            --border: rgba(255,255,255,0.13); --border-hover: rgba(255,255,255,0.28);
+            --dim: rgba(255,255,255,0.42);
+        }
+        body { background: var(--bg); color: #fff; font-family: 'Inter', system-ui, sans-serif; min-height: 100vh; overflow-x: hidden; padding-bottom: 80px; }
+        .orb { position: fixed; border-radius: 50%; filter: blur(100px); z-index: -1; animation: drift 22s ease-in-out infinite alternate; will-change: transform; }
+        .orb-1 { width: 650px; height: 650px; background: radial-gradient(circle, #1DB95448, transparent 70%); top: -15%; left: -12%; }
+        .orb-2 { width: 550px; height: 550px; background: radial-gradient(circle, #7928ca44, transparent 70%); bottom: -12%; right: -8%; animation-delay: -7s; animation-duration: 28s; }
+        .orb-3 { width: 380px; height: 380px; background: radial-gradient(circle, #ff2d7828, transparent 70%); top: 45%; left: 48%; animation-delay: -13s; animation-duration: 18s; }
+        @keyframes drift { 0%{transform:translate(0,0) scale(1)} 50%{transform:translate(50px,-35px) scale(1.04)} 100%{transform:translate(80px,45px) scale(1.08)} }
+        .grid-bg { position: fixed; inset: 0; z-index: -1; background-image: linear-gradient(rgba(255,255,255,0.013) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.013) 1px, transparent 1px); background-size: 60px 60px; }
+        .header-wrap { max-width: 600px; margin: 70px auto 0; padding: 0 20px; text-align: center; position: relative; z-index: 10; }
+        .header-card { background: linear-gradient(135deg, var(--glass), rgba(255,255,255,0.03)); backdrop-filter: blur(40px) saturate(180%); -webkit-backdrop-filter: blur(40px) saturate(180%); border: 1.5px solid var(--border); border-radius: 32px; padding: 48px 40px; position: relative; overflow: hidden; box-shadow: inset 0 2px 8px rgba(255,255,255,0.07), 0 30px 70px -20px rgba(0,0,0,0.7), 0 0 80px -20px rgba(29,185,84,0.14); }
+        .header-card::after { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1.5px; background: linear-gradient(90deg, transparent, #1DB954cc, #7928cacc, transparent); }
+        .header-card::before { content: ''; position: absolute; top: 0; left: -110%; width: 55%; height: 1px; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.45), transparent); animation: shimmer 5s ease-in-out infinite; }
+        @keyframes shimmer { 0%{left:-110%;opacity:0} 20%{opacity:1} 80%{opacity:1} 100%{left:210%;opacity:0} }
+        .header-glow { position: absolute; inset: 0; pointer-events: none; background: radial-gradient(circle at 30% 30%, rgba(29,185,84,0.09), transparent 55%); }
+        .badge { display: inline-flex; align-items: center; gap: 7px; background: rgba(29,185,84,0.11); border: 1px solid rgba(29,185,84,0.28); border-radius: 100px; padding: 5px 14px; font-size: 0.7rem; font-weight: 700; letter-spacing: 1.8px; text-transform: uppercase; color: var(--accent); margin-bottom: 20px; position: relative; z-index: 1; }
+        .badge-dot { width: 6px; height: 6px; background: var(--accent); border-radius: 50%; animation: blink 1.6s ease-in-out infinite; }
+        @keyframes blink { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.35;transform:scale(0.65)} }
+        h1 { font-size: clamp(2.2rem,5vw,3.2rem); font-weight: 900; letter-spacing: -2px; line-height: 1; margin-bottom: 8px; background: linear-gradient(135deg, #fff 25%, rgba(255,255,255,0.52)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; position: relative; z-index: 1; }
+        .subtitle { color: var(--dim); font-size: 0.88rem; margin-bottom: 32px; position: relative; z-index: 1; }
+        .drop-zone { position: relative; z-index: 1; border: 2px dashed rgba(29,185,84,0.35); border-radius: 20px; padding: 36px 24px; cursor: pointer; transition: all 0.3s ease; background: rgba(29,185,84,0.04); }
+        .drop-zone:hover, .drop-zone.drag-over { border-color: rgba(29,185,84,0.7); background: rgba(29,185,84,0.09); transform: scale(1.01); }
+        .drop-zone input[type="file"] { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
+        .drop-icon { font-size: 2.8rem; margin-bottom: 10px; }
+        .drop-label { font-size: 0.95rem; font-weight: 700; color: rgba(255,255,255,0.8); margin-bottom: 6px; }
+        .drop-hint { font-size: 0.76rem; color: var(--dim); line-height: 1.6; }
+        .drop-hint code { background: rgba(255,255,255,0.08); padding: 2px 7px; border-radius: 5px; font-size: 0.72rem; color: var(--accent); border: 1px solid rgba(29,185,84,0.2); }
+        #filter-bar { display: none; margin-top: 18px; gap: 8px; flex-wrap: wrap; justify-content: center; position: relative; z-index: 1; }
+        .filter-btn { padding: 6px 14px; border-radius: 100px; border: 1px solid var(--border); background: var(--glass); color: var(--dim); font-size: 0.75rem; font-weight: 600; cursor: pointer; transition: all 0.2s; white-space: nowrap; }
+        .filter-btn:hover { border-color: rgba(29,185,84,0.4); color: var(--accent); }
+        .filter-btn.active { background: rgba(29,185,84,0.15); border-color: rgba(29,185,84,0.5); color: var(--accent); }
+        #status { margin-top: 16px; font-weight: 600; font-size: 0.84rem; color: var(--dim); min-height: 20px; transition: color 0.3s; position: relative; z-index: 1; }
+        #status.ok { color: var(--accent); }
+        #status.err { color: #ff6b6b; }
+        .stats-row { display: none; justify-content: center; gap: 28px; margin-top: 22px; padding-top: 18px; border-top: 1px solid var(--border); position: relative; z-index: 1; }
+        .stat { text-align: center; }
+        .stat-val { font-size: 1.5rem; font-weight: 900; letter-spacing: -1px; }
+        .stat-lbl { font-size: 0.68rem; color: var(--dim); text-transform: uppercase; letter-spacing: 1.2px; margin-top: 2px; }
+        .section-bar { display: none; max-width: 1400px; margin: 54px auto 0; padding: 0 24px 14px; align-items: center; gap: 14px; border-bottom: 1px solid rgba(255,255,255,0.07); }
+        .section-bar span { font-size: 0.72rem; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--dim); }
+        .section-line { flex: 1; height: 1px; background: rgba(255,255,255,0.07); }
+        #grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(265px,1fr)); gap: 22px; max-width: 1400px; margin: 22px auto 0; padding: 0 24px; position: relative; z-index: 10; }
+        .card { background: linear-gradient(135deg, var(--glass), rgba(255,255,255,0.03)); backdrop-filter: blur(20px) saturate(150%); -webkit-backdrop-filter: blur(20px) saturate(150%); border: 1.5px solid var(--border); border-radius: 22px; padding: 16px; display: flex; flex-direction: column; position: relative; overflow: hidden; transition: transform 0.38s cubic-bezier(0.175,0.885,0.32,1.275), border-color 0.3s, background 0.3s, box-shadow 0.38s; opacity: 0; transform: translateY(26px); animation: cardIn 0.5s ease forwards; box-shadow: inset 0 1.5px 4px rgba(255,255,255,0.05), 0 8px 32px rgba(0,0,0,0.3); }
+        .card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.16), transparent); }
+        .card::after { content: ''; position: absolute; inset: 0; border-radius: inherit; background: radial-gradient(ellipse at 50% 0%, rgba(29,185,84,0.09), transparent 65%); opacity: 0; transition: opacity 0.4s; pointer-events: none; }
+        .card:hover { transform: translateY(-11px) scale(1.016); border-color: var(--border-hover); background: linear-gradient(135deg, var(--glass-hover), rgba(255,255,255,0.05)); box-shadow: inset 0 1.5px 4px rgba(255,255,255,0.09), 0 28px 56px rgba(0,0,0,0.55), 0 0 30px rgba(29,185,84,0.07); }
+        .card:hover::after { opacity: 1; }
+        @keyframes cardIn { to { opacity:1; transform:translateY(0); } }
+        .rank { position: absolute; top: 13px; left: 13px; z-index: 3; background: rgba(0,0,0,0.6); backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,0.13); border-radius: 8px; padding: 3px 9px; font-size: 0.68rem; font-weight: 800; color: rgba(255,255,255,0.6); }
+        .rank.gold { background: rgba(29,185,84,0.18); border-color: rgba(29,185,84,0.4); color: #1DB954; }
+        .genre-chip { position: absolute; top: 13px; right: 13px; z-index: 3; background: rgba(0,0,0,0.55); backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,0.1); border-radius: 7px; padding: 3px 8px; font-size: 0.62rem; font-weight: 700; color: rgba(255,255,255,0.5); letter-spacing: 0.5px; text-transform: uppercase; }
+        .img-wrap { position: relative; border-radius: 14px; overflow: hidden; margin-bottom: 14px; }
+        .img-placeholder { width: 100%; height: 256px; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, rgba(29,185,84,0.14), rgba(121,40,202,0.14)); border-radius: 14px; font-size: 3.5rem; transition: transform 0.5s ease; }
+        .card:hover .img-placeholder { transform: scale(1.04); }
+        .img-overlay { position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.55) 0%, transparent 52%); opacity: 0; transition: opacity 0.3s; }
+        .card:hover .img-overlay { opacity: 1; }
+        .year-chip { position: absolute; bottom: 10px; left: 10px; background: rgba(0,0,0,0.65); backdrop-filter: blur(6px); border: 1px solid rgba(255,255,255,0.12); border-radius: 7px; padding: 3px 9px; font-size: 0.7rem; font-weight: 800; color: rgba(255,255,255,0.8); opacity: 0; transition: opacity 0.3s; }
+        .card:hover .year-chip { opacity: 1; }
+        .duration-chip { position: absolute; bottom: 10px; right: 10px; background: rgba(0,0,0,0.65); backdrop-filter: blur(6px); border: 1px solid rgba(255,255,255,0.12); border-radius: 7px; padding: 3px 8px; font-size: 0.7rem; font-weight: 700; color: rgba(255,255,255,0.7); opacity: 0; transition: opacity 0.3s; }
+        .card:hover .duration-chip { opacity: 1; }
+        .card-info { flex-grow: 1; padding: 0 2px; }
+        .card-title { font-size: 0.96rem; font-weight: 700; line-height: 1.35; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .card-meta { display: flex; align-items: center; gap: 6px; flex-wrap: nowrap; overflow: hidden; }
+        .card-artist { font-size: 0.78rem; color: var(--dim); font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .dot { font-size: 0.4rem; color: rgba(255,255,255,0.18); flex-shrink: 0; }
+        .card-album { font-size: 0.74rem; color: rgba(255,255,255,0.25); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .btn-row { display: flex; gap: 8px; margin-top: 14px; }
+        .card-btn { flex: 1; display: flex; align-items: center; justify-content: center; gap: 6px; background: linear-gradient(135deg, rgba(29,185,84,0.12), rgba(121,40,202,0.07)); color: rgba(255,255,255,0.65); padding: 10px 8px; border-radius: 12px; text-decoration: none; font-weight: 700; font-size: 0.74rem; letter-spacing: 0.6px; text-transform: uppercase; border: 1.5px solid var(--border); transition: all 0.25s; backdrop-filter: blur(8px); }
+        .card-btn:hover { background: linear-gradient(135deg, rgba(29,185,84,0.28), rgba(121,40,202,0.14)); border-color: rgba(29,185,84,0.4); color: #fff; box-shadow: 0 6px 18px rgba(29,185,84,0.2); transform: translateY(-2px); }
+        .card-btn.yt:hover { background: rgba(255,65,65,0.14); border-color: rgba(255,65,65,0.38); color: #ff6b6b; box-shadow: 0 6px 18px rgba(255,65,65,0.15); }
+        .card-btn.disabled { opacity: 0.28; pointer-events: none; }
+        .skel { background: var(--glass); border: 1.5px solid var(--border); border-radius: 22px; padding: 16px; overflow: hidden; }
+        .skel-img { height: 256px; border-radius: 14px; background: rgba(255,255,255,0.04); margin-bottom: 14px; position: relative; overflow: hidden; }
+        .skel-line { height: 12px; border-radius: 6px; background: rgba(255,255,255,0.04); margin-bottom: 8px; position: relative; overflow: hidden; }
+        .skel-line.s { width: 55%; }
+        .skel-img::after, .skel-line::after { content: ''; position: absolute; inset: 0; background: linear-gradient(110deg, transparent 30%, rgba(255,255,255,0.055) 50%, transparent 70%); background-size: 200% 100%; animation: sweep 1.6s ease infinite; }
+        @keyframes sweep { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+        .empty { grid-column: 1/-1; text-align: center; padding: 90px 20px; color: var(--dim); }
+        .empty-icon { font-size: 4rem; margin-bottom: 16px; }
+        .empty h3 { font-size: 1.15rem; font-weight: 700; color: rgba(255,255,255,0.45); margin-bottom: 8px; }
+        #scrolltop { position: fixed; bottom: 28px; right: 28px; width: 44px; height: 44px; background: var(--glass); backdrop-filter: blur(20px); border: 1.5px solid var(--border); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1rem; cursor: pointer; opacity: 0; transform: translateY(10px); transition: all 0.3s; z-index: 100; }
+        #scrolltop.show { opacity: 1; transform: translateY(0); }
+        #scrolltop:hover { background: rgba(255,255,255,0.11); border-color: rgba(255,255,255,0.26); }
+        @media (max-width: 600px) { .header-wrap { margin-top: 36px; } .header-card { padding: 30px 22px; } h1 { font-size: 2rem; } #grid { gap: 14px; padding: 0 14px; } .btn-row { flex-direction: column; } }
     </style>
 </head>
 <body>
-    <div class="orb orb-1"></div>
-    <div class="orb orb-2"></div>
-
-    <div class="header">
-        <h1>Global 100</h1>
-        <button onclick="fetchSpotify()">🎵 Fetch Latest Releases</button>
-        <p id="status">Loading live Spotify data...</p>
+    <div class="orb orb-1"></div><div class="orb orb-2"></div><div class="orb orb-3"></div>
+    <div class="grid-bg"></div>
+    <div class="header-wrap">
+        <div class="header-card">
+            <div class="header-glow"></div>
+            <div class="badge"><div class="badge-dot"></div> Your Library</div>
+            <h1>Global 100</h1>
+            <p class="subtitle">Drop your CSV — 50 random retro tracks, shuffled every time</p>
+            <div class="drop-zone" id="dropZone">
+                <input type="file" id="csvInput" accept=".csv">
+                <div class="drop-icon">📂</div>
+                <div class="drop-label" id="dropLabel">Drop your CSV here, or click to browse</div>
+                <div class="drop-hint" style="margin-top:8px;">
+                    Columns: <code>Name</code> <code>Artist</code> <code>Album</code> <code>Year</code>
+                    <code>DurationSeconds</code> <code>Genre</code> <code>SpotifyLink</code> <code>YouTubeMusicLink</code>
+                </div>
+            </div>
+            <div id="filter-bar"></div>
+            <div id="status">Waiting for CSV…</div>
+            <div class="stats-row" id="statsRow">
+                <div class="stat"><div class="stat-val" id="statShowing">—</div><div class="stat-lbl">Showing</div></div>
+                <div class="stat"><div class="stat-val" id="statTotal">—</div><div class="stat-lbl">Total</div></div>
+                <div class="stat"><div class="stat-val" id="statAvgDur">—</div><div class="stat-lbl">Avg Duration</div></div>
+                <div class="stat"><div class="stat-val" id="statGenres">—</div><div class="stat-lbl">Genres</div></div>
+            </div>
+        </div>
     </div>
-
+    <div class="section-bar" id="sectionBar">
+        <span>Shuffled Pick</span><div class="section-line"></div><span id="sectionCount"></span>
+    </div>
     <div id="grid"></div>
+    <div id="scrolltop" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</div>
 
 <script>
-async function fetchSpotify() {
-    const status = document.getElementById('status');
-    const grid = document.getElementById('grid');
-    
-    status.textContent = '🔄 Loading Spotify releases...';
-    grid.innerHTML = '';
+const esc = s => String(s??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+function fmtDur(secs){const s=parseInt(secs,10);if(isNaN(s)||s<=0)return null;return Math.floor(s/60)+':'+(s%60+'').padStart(2,'0');}
+function shuffle(arr){const a=[...arr];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
 
-    try {
-        const response = await fetch('/api/spotify');
-        if (!response.ok) throw new Error(`Server error: ${response.status}`);
-        
-        const data = await response.json();
-        
-        if (!data.albums || data.albums.length === 0) {
-            throw new Error('No albums received from Spotify');
-        }
+function parseRetroCSV(text){
+    // Normalise: remove \r and \f, split on \n
+    text=text.replace(/\r\n/g,'\n').replace(/\r/g,'\n').replace(/\f/g,'\n');
+    const lines=text.split('\n');
 
-        data.albums.forEach((album, i) => {
-            const card = document.createElement('div');
-            card.className = 'card';
-            
-            const imgUrl = album.images?.[0]?.url || '';
-            const artistName = album.artists?.[0]?.name || 'Unknown Artist';
-            const albumUrl = album.external_urls?.spotify || '#';
-            
-            card.innerHTML = `
-                <img src="${imgUrl}" alt="${album.name}" loading="lazy" 
-                     style="width:100%;height:300px;object-fit:cover;border-radius:16px;margin-bottom:18px;box-shadow:0 10px 20px rgba(0,0,0,0.3);"
-                     onerror="this.style.display='none';this.parentNode.insertAdjacentHTML('afterbegin','<div style=\\"display:flex;align-items:center;justify-content:center;height:300px;background:linear-gradient(135deg,#1DB954,#7928ca);border-radius:16px;font-size:4rem\\">🎵</div>')">
-                <div class="card-info">
-                    <strong>${album.name}</strong>
-                    <small>${artistName}</small>
-                </div>
-                <a href="${albumUrl}" target="_blank" class="btn">🎧 SPOTIFY</a>
-            `;
-            grid.appendChild(card);
-        });
+    // Each physical line is wrapped in outer double-quotes — strip them
+    const stripped=lines.map(line=>{
+        let s=line.trim();
+        if(s.startsWith('"')&&s.endsWith('"'))s=s.slice(1,-1);
+        return s;
+    });
 
-        status.innerHTML = `✅ <strong>${data.albums.length}</strong> New Releases Live!`;
-    } catch (error) {
-        status.textContent = `❌ ${error.message}`;
-        console.error('Load error:', error);
+    // Group into logical records: blank stripped line = record separator
+    const blocks=[];let cur=[];
+    for(const s of stripped){
+        if(s===''){if(cur.length){blocks.push(cur.join(''));cur=[];}}
+        else{cur.push(s);}
     }
+    if(cur.length)blocks.push(cur.join(''));
+    if(blocks.length<2)throw new Error('CSV appears empty or unreadable.');
+
+    // Parse a record: inner "" = escaped quote, comma-separated
+    function parseRow(row){
+        const restored=row.replace(/""/g,'"');
+        const fields=[];let field='',inQ=false;
+        for(let i=0;i<restored.length;i++){
+            const c=restored[i];
+            if(c==='"'){inQ=!inQ;continue;}
+            if(c===','&&!inQ){fields.push(field.trim());field='';continue;}
+            field+=c;
+        }
+        fields.push(field.trim());
+        return fields;
+    }
+
+    const headerFields=parseRow(blocks[0]).map(h=>h.toLowerCase().replace(/[^a-z0-9]/g,''));
+
+    // Fix missing spaces from line-break join (e.g. MichaelJackson -> Michael Jackson)
+    // Logic mirrors camelcase.py exactly: find first index where char is upper,
+    // prev is lower, next is lower — insert space there, then title-case.
+    // Runs repeatedly until no more CamelCase patterns remain.
+    function fixSpaces(s){
+        if(!s||s.startsWith('http'))return s;
+        let word=s;
+        let safety=0;
+        while(safety++<30){
+            let spaceIdx=-1;
+            for(let i=1;i<word.length-1;i++){
+                if(word[i]===word[i].toUpperCase()&&word[i]!==word[i].toLowerCase()
+                    &&word[i-1]===word[i-1].toLowerCase()&&word[i-1]!==word[i-1].toUpperCase()
+                    &&word[i+1]===word[i+1].toLowerCase()&&word[i+1]!==word[i+1].toUpperCase()){
+                    spaceIdx=i;
+                    break;
+                }
+            }
+            if(spaceIdx===-1)break;
+            word=word.slice(0,spaceIdx)+' '+word.slice(spaceIdx);
+        }
+        // Title-case each word (mirrors Python's .title())
+        return word.replace(/\b\w/g,c=>c.toUpperCase());
+    }
+
+    const colAliases={
+        name:['name','track','title','song','trackname'],
+        artist:['artist','artists','performer','by'],
+        album:['album','albumname','record'],
+        year:['year','releaseyear','releasedate'],
+        duration:['durationseconds','duration','durationinseconds','durationms','seconds','sec','length'],
+        genre:['genre','style','category'],
+        spotify:['spotifylink','spotify','spotifyurl'],
+        youtube:['youtubemusiclink','youtubelink','youtube','youtubeurl','ytlink']
+    };
+    function col(key){for(const alias of colAliases[key]){const idx=headerFields.indexOf(alias);if(idx!==-1)return idx;}return -1;}
+    const cols={};for(const key of Object.keys(colAliases))cols[key]=col(key);
+    if(cols.name===-1)throw new Error('No track name column found. Headers: '+headerFields.join(', '));
+
+    const songs=[];
+    for(const block of blocks.slice(1)){
+        if(!block.trim())continue;
+        const f=parseRow(block);
+        const get=key=>(cols[key]!==-1&&f[cols[key]]!=null)?f[cols[key]].trim():'';
+        let durSec='';
+        const rawDur=get('duration').replace(/[^0-9.]/g,'');
+        if(rawDur){const n=parseFloat(rawDur);durSec=String(Math.round(n>3600?n/1000:n));}
+        const cleanUrl=u=>u.replace(/[\n\r\f\t]/g,'').trim();
+        songs.push({
+            name:fixSpaces(get('name'))||'Unknown',
+            artist:fixSpaces(get('artist'))||'Unknown Artist',
+            album:fixSpaces(get('album'))||'',
+            year:get('year'),duration:durSec,
+            genre:fixSpaces(get('genre'))||'',
+            spotify:cleanUrl(get('spotify')),
+            youtube:cleanUrl(get('youtube'))
+        });
+    }
+    if(songs.length===0)throw new Error('CSV was parsed but contained no valid tracks.');
+    return songs;
 }
 
-// Load immediately + auto-refresh every 10 minutes
-fetchSpotify();
-setInterval(fetchSpotify, 600000);
-</script>
+let allSongs=[],activeGenre='All';
 
-</body>
-</html>
+const genreEmoji={'Rock':'🎸','Pop':'🎤','R&B':'🎶','Funk':'🕺','Disco':'🪩','Soul':'💿','Dance':'💃','House':'🎧','Hip Hop':'🎤','Grunge':'🤘','Folk':'🪕','Post-punk':'⚡','Synth-pop':'🎹','Rockabilly':'🎸','Punk':'🤘'};
+const genreColors={'Rock':'#e05252','Pop':'#52a8e0','R&B':'#e0a852','Funk':'#e0e052','Disco':'#c452e0','Soul':'#52e0a8','Dance':'#5252e0','House':'#52e0e0','Hip Hop':'#e08052','Grunge':'#a8a8a8','Folk':'#88c47a','Punk':'#e05292','Post-punk':'#b452e0','Synth-pop':'#52b4e0','Rockabilly':'#e0b452'};
 
+function renderSongs(songs){
+    const grid=document.getElementById('grid');
+    grid.innerHTML='';
+    const pool=activeGenre==='All'?songs:songs.filter(s=>s.genre===activeGenre);
+    const picked=shuffle(pool).slice(0,50);
+    if(picked.length===0){grid.innerHTML='<div class="empty"><div class="empty-icon">🎵</div><h3>No tracks found</h3><p>Try a different genre filter.</p></div>';return;}
+    picked.forEach((t,i)=>{
+        const card=document.createElement('div');
+        card.className='card';
+        card.style.animationDelay=Math.min(i*20,700)+'ms';
+        const rank=i+1;
+        const dur=fmtDur(t.duration);
+        const hasSpot=t.spotify.startsWith('http');
+        const hasYT=t.youtube.startsWith('http');
+        const gColor=genreColors[t.genre]||'rgba(255,255,255,0.4)';
+        card.innerHTML=`
+            <div class="${rank<=3?'rank gold':'rank'}">${rank===1?'🥇 #1':rank===2?'🥈 #2':rank===3?'🥉 #3':'#'+rank}</div>
+            ${t.genre?`<div class="genre-chip" style="color:${gColor};border-color:${gColor}33">${esc(t.genre)}</div>`:''}
+            <div class="img-wrap">
+                <div class="img-placeholder">${genreEmoji[t.genre]||'🎵'}</div>
+                <div class="img-overlay"></div>
+                ${t.year?`<div class="year-chip">📅 ${esc(t.year)}</div>`:''}
+                ${dur?`<div class="duration-chip">⏱ ${esc(dur)}</div>`:''}
+            </div>
+            <div class="card-info">
+                <div class="card-title">${esc(t.name)}</div>
+                <div class="card-meta">
+                    <span class="card-artist">${esc(t.artist)}</span>
+                    ${t.album?`<span class="dot">•</span><span class="card-album">${esc(t.album)}</span>`:''}
+                </div>
+            </div>
+            <div class="btn-row">
+                ${hasSpot?`<a href="${esc(t.spotify)}" target="_blank" rel="noopener" class="card-btn">🎧 Spotify</a>`:`<span class="card-btn disabled">🎧 Spotify</span>`}
+                ${hasYT?`<a href="${esc(t.youtube)}" target="_blank" rel="noopener" class="card-btn yt">▶ YouTube</a>`:`<span class="card-btn yt disabled">▶ YouTube</span>`}
+            </div>`;
+        grid.appendChild(card);
+    });
+    document.getElementById('sectionBar').style.display='flex';
+    document.getElementById('sectionCount').textContent=picked.length+' of '+pool.length+' tracks';
+    document.getElementById('statsRow').style.display='flex';
+    document.getElementById('statShowing').textContent=picked.length;
+    document.getElementById('statTotal').textContent=pool.length;
+    const durations=picked.map(t=>parseInt(t.duration)).filter(n=>!isNaN(n)&&n>0);
+    const avg=durations.length?Math.round(durations.reduce((a,b)=>a+b,0)/durations.length):null;
+    document.getElementById('statAvgDur').textContent=avg?fmtDur(avg):'—';
+    document.getElementById('statGenres').textContent=new Set(songs.map(s=>s.genre).filter(Boolean)).size||'—';
+}
+
+function buildFilterBar(songs){
+    const bar=document.getElementById('filter-bar');
+    const genres=['All',...new Set(songs.map(s=>s.genre).filter(Boolean))].sort((a,b)=>a==='All'?-1:a.localeCompare(b));
+    bar.innerHTML='';
+    genres.forEach(g=>{
+        const btn=document.createElement('button');
+        btn.className='filter-btn'+(g===activeGenre?' active':'');
+        btn.textContent=g==='All'?'All ('+songs.length+')':g+' ('+songs.filter(s=>s.genre===g).length+')';
+        btn.onclick=()=>{
+            activeGenre=g;
+            document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+            btn.classList.add('active');
+            renderSongs(allSongs);
+            window.scrollTo({top:document.getElementById('sectionBar').offsetTop-20,behavior:'smooth'});
+        };
+        bar.appendChild(btn);
+    });
+    bar.style.display='flex';
+}
+
+function handleFile(file){
+    if(!file)return;
+    if(!file.name.toLowerCase().endsWith('.csv')){setStatus('err','❌ Please upload a .csv file.');return;}
+    const status=document.getElementById('status'),grid=document.getElementById('grid');
+    status.className='';status.textContent='⏳ Parsing CSV…';
+    grid.innerHTML='';
+    document.getElementById('statsRow').style.display='none';
+    document.getElementById('sectionBar').style.display='none';
+    document.getElementById('filter-bar').style.display='none';
+    for(let i=0;i<10;i++)grid.innerHTML+='<div class="skel"><div class="skel-img"></div><div class="skel-line"></div><div class="skel-line s"></div></div>';
+    const reader=new FileReader();
+    reader.onload=e=>{
+        try{
+            allSongs=parseRetroCSV(e.target.result);
+            activeGenre='All';
+            buildFilterBar(allSongs);
+            renderSongs(allSongs);
+            setStatus('ok','✅ <strong>'+allSongs.length+'</strong> tracks loaded — showing 50 random picks');
+            document.getElementById('dropLabel').textContent='✅  '+file.name;
+        }catch(err){
+            grid.innerHTML='<div class="empty"><div class="empty-icon">⚠️</div><h3>Couldn\'t parse CSV</h3><p>'+esc(err.message)+'</p></div>';
+            setStatus('err','❌ '+err.message);
+        }
+    };
+    reader.onerror=()=>setStatus('err','❌ Failed to read file.');
+    reader.readAsText(file);
+}
+
+function setStatus(cls,msg){const el=document.getElementById('status');el.className=cls;el.innerHTML=msg;}
 
 
