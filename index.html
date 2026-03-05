@@ -212,24 +212,85 @@ function fixSpaces(s){
     return word.replace(/\b\w/g,c=>c.toUpperCase());
 }
 
-/* ── CSV PARSER ── */
+/* ── ENCODING SANITIZATION ── */
+function sanitizeUTF8(text){
+    // Remove UTF-8 BOM if present
+    if(text.charCodeAt(0)===0xFEFF){text=text.slice(1);}
+    // Remove null bytes and control characters
+    text=text.replace(/\0/g,'');
+    // Normalize line breaks
+    text=text.replace(/\r\n/g,'\n').replace(/\r/g,'\n');
+    // Handle form feeds
+    text=text.replace(/\f/g,'\n');
+    // Replace invalid UTF-8 sequences with safe character
+    text=text.replace(/[\uFFFD]/g,'?');
+    // Trim leading/trailing whitespace
+    return text.trim();
+}
+
+/* ── CSV PARSER (Standard RFC 4180) ── */
 function parseRetroCSV(text){
-    text=text.replace(/\r\n/g,'\n').replace(/\r/g,'\n').replace(/\f/g,'\n');
-    const lines=text.split('\n');
-    const stripped=lines.map(l=>{let s=l.trim();if(s.startsWith('"')&&s.endsWith('"'))s=s.slice(1,-1);return s;});
-    const blocks=[];let cur=[];
-    for(const s of stripped){if(s===''){if(cur.length){blocks.push(cur.join(''));cur=[];}}else{cur.push(s);}}
-    if(cur.length)blocks.push(cur.join(''));
-    if(blocks.length<2)throw new Error('CSV appears empty or unreadable.');
-
-    function parseRow(row){
-        const r=row.replace(/""/g,'"');
-        const f=[];let field='',inQ=false;
-        for(let i=0;i<r.length;i++){const c=r[i];if(c==='"'){inQ=!inQ;continue;}if(c===','&&!inQ){f.push(field.trim());field='';continue;}field+=c;}
-        f.push(field.trim());return f;
+    // Sanitize encoding issues first
+    text=sanitizeUTF8(text);
+    
+    // Parse CSV following RFC 4180 standard
+    function parseCSV(text){
+        const rows=[];
+        let row=[];
+        let field='';
+        let inQuotes=false;
+        let i=0;
+        
+        while(i<text.length){
+            const char=text[i];
+            const nextChar=text[i+1];
+            
+            if(char==='"'){
+                if(inQuotes && nextChar==='"'){
+                    // Escaped quote: "" becomes "
+                    field+='"';
+                    i+=2;
+                }else{
+                    // Toggle quote mode
+                    inQuotes=!inQuotes;
+                    i++;
+                }
+            }else if(char===',' && !inQuotes){
+                // Field separator
+                row.push(field);
+                field='';
+                i++;
+            }else if((char==='\n' || char==='\r') && !inQuotes){
+                // Line separator
+                row.push(field);
+                if(row.some(f=>f.trim())){
+                    rows.push(row);
+                }
+                row=[];
+                field='';
+                // Skip CRLF
+                if(char==='\r' && nextChar==='\n'){i+=2;}
+                else{i++;}
+            }else{
+                field+=char;
+                i++;
+            }
+        }
+        
+        // Add remaining field and row
+        row.push(field);
+        if(row.some(f=>f.trim())){
+            rows.push(row);
+        }
+        
+        return rows;
     }
-
-    const hdr=parseRow(blocks[0]).map(h=>h.toLowerCase().replace(/[^a-z0-9]/g,''));
+    
+    const rows=parseCSV(text);
+    if(rows.length<2)throw new Error('CSV appears empty or unreadable.');
+    
+    // Parse headers and find column indices
+    const hdr=rows[0].map(h=>h.trim().toLowerCase().replace(/[^a-z0-9]/g,''));
     const aliases={
         name:['name','track','title','song','trackname'],
         artist:['artist','artists','performer','by'],
@@ -241,30 +302,61 @@ function parseRetroCSV(text){
         youtube:['youtubemusiclink','youtubelink','youtube','youtubeurl','ytlink'],
         image:['image','imageurl','img','artwork','cover','albumart','thumbnail','photo']
     };
-    function col(k){for(const a of aliases[k]){const i=hdr.indexOf(a);if(i!==-1)return i;}return -1;}
-    const cols={};for(const k of Object.keys(aliases))cols[k]=col(k);
-    if(cols.name===-1)throw new Error('No track name column found. Headers detected: '+hdr.join(', '));
-
+    
+    function findColumn(key){
+        for(const alias of aliases[key]){
+            const idx=hdr.indexOf(alias);
+            if(idx!==-1)return idx;
+        }
+        return -1;
+    }
+    
+    const cols={};
+    for(const key of Object.keys(aliases)){
+        cols[key]=findColumn(key);
+    }
+    
+    if(cols.name===-1){
+        throw new Error('No track name column found. Headers: '+hdr.join(', '));
+    }
+    
+    // Extract song data
     const songs=[];
-    for(const block of blocks.slice(1)){
-        if(!block.trim())continue;
-        const f=parseRow(block);
-        const get=k=>(cols[k]!==-1&&f[cols[k]]!=null)?f[cols[k]].trim():'';
-        let dur='';const rd=get('duration').replace(/[^0-9.]/g,'');
-        if(rd){const n=parseFloat(rd);dur=String(Math.round(n>3600?n/1000:n));}
-        const cu=u=>u.replace(/[\n\r\f\t]/g,'').trim();
+    for(let idx=1;idx<rows.length;idx++){
+        const rawRow=rows[idx];
+        
+        // Get field value by column index
+        const get=(key)=>{
+            const colIdx=cols[key];
+            if(colIdx===-1 || !rawRow[colIdx])return '';
+            return rawRow[colIdx].trim();
+        };
+        
+        // Parse duration
+        let duration='';
+        const durStr=get('duration').replace(/[^0-9.]/g,'');
+        if(durStr){
+            const durNum=parseFloat(durStr);
+            duration=String(Math.round(durNum>3600?durNum/1000:durNum));
+        }
+        
+        // Clean URLs (remove line breaks)
+        const cleanUrl=u=>u.replace(/[\n\r\t]/g,'').trim();
+        
         songs.push({
             name:fixSpaces(get('name'))||'Unknown',
             artist:fixSpaces(get('artist'))||'Unknown Artist',
             album:fixSpaces(get('album'))||'',
-            year:get('year'), duration:dur,
+            year:get('year'),
+            duration:duration,
             genre:fixSpaces(get('genre'))||'',
-            spotify:cu(get('spotify')),
-            youtube:cu(get('youtube')),
-            image:cu(get('image'))
+            spotify:cleanUrl(get('spotify')),
+            youtube:cleanUrl(get('youtube')),
+            image:cleanUrl(get('image'))
         });
     }
-    if(songs.length===0)throw new Error('CSV parsed but no valid tracks found.');
+    
+    if(songs.length===0)throw new Error('No valid tracks found in CSV.');
     return songs;
 }
 
@@ -435,10 +527,10 @@ function setStatus(cls,msg){const el=document.getElementById('status');el.classN
 document.getElementById('csvInput').addEventListener('change',function(e){
     if(e.target.files&&e.target.files[0]){
         const file=e.target.files[0];
-        displayFileName(file);   // read name BEFORE value reset
+        displayFileName(file);
         handleFile(file);
     }
-    this.value='';               // reset so same file can be re-uploaded
+    this.value='';
 });
 
 const dz=document.getElementById('dropZone');
@@ -449,7 +541,7 @@ dz.addEventListener('drop',e=>{
     e.preventDefault();e.stopPropagation();dz.classList.remove('drag-over');
     if(e.dataTransfer.files&&e.dataTransfer.files[0]){
         const file=e.dataTransfer.files[0];
-        displayFileName(file);   // also update badge on drag-and-drop
+        displayFileName(file);
         handleFile(file);
     }
 });
